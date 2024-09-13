@@ -1,0 +1,12 @@
+import { Stack } from "expo-router";
+
+export default function LogsLayout() {
+  return (
+    <Stack>
+      <Stack.Screen name="index" options={{ headerTitle: "Logs" }} />
+      <Stack.Screen name="show" options={{ headerTitle: "Log Details" }} />
+      <Stack.Screen name="add" options={{ presentation: "modal" }} />
+      <Stack.Screen name="edit" options={{ presentation: "modal" }} />
+    </Stack>
+  );
+}

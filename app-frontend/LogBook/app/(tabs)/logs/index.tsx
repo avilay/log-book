@@ -10,6 +10,7 @@ import {
 import { formatDate, formatTime } from "@/lib/utils";
 import { getLogsGroupedByDay, GroupedLogs } from "@/lib/model/log";
 import { useEffect, useState } from "react";
+import Spinner from "@/components/Spinner";
 
 export default function LogsIndex() {
   const [groupedLogs, setGroupedLogs] = useState<GroupedLogs[]>([]);
@@ -19,20 +20,23 @@ export default function LogsIndex() {
       const logs = await getLogsGroupedByDay();
       setGroupedLogs(logs);
     }
-
+    console.debug("Getting logs in logs/index effect");
     getLogs();
   }, []);
 
-  return (
-    <SafeAreaView style={styles.container}>
+  let content = <></>;
+  if (groupedLogs.length == 0) {
+    content = <Spinner />;
+  } else {
+    content = (
       <SectionList
         sections={groupedLogs}
-        keyExtractor={(log, idx) => (log.logId + idx).toString()}
+        keyExtractor={(log) => log.logId}
         renderItem={({ item }) => (
           <Link href={`/logs/${item.logId}`}>
             <View style={styles.item}>
               <Text>{formatTime(item.date)}</Text>
-              <Text style={styles.itemText}>{item.activity}</Text>
+              <Text style={styles.itemText}>{item.activity.name}</Text>
             </View>
           </Link>
         )}
@@ -42,8 +46,10 @@ export default function LogsIndex() {
           </View>
         )}
       />
-    </SafeAreaView>
-  );
+    );
+  }
+
+  return <SafeAreaView style={styles.container}>{content}</SafeAreaView>;
 }
 
 const styles = StyleSheet.create({

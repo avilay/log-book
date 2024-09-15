@@ -1,21 +1,12 @@
 import { generateDates, getRandom } from "../utils";
-import { generateActivities } from "./activity";
+import { generateActivities, Activity } from "./activity";
+import quotes from "./quotes.json";
 
-export function generateLogs(fromTimestamp: number, toTimestamp: number) {
-  const dates = generateDates(fromTimestamp, toTimestamp);
-  const activities = generateActivities(dates.length);
-  const logs = dates.map((date, idx) => ({
-    logId: idx,
-    date: date,
-    activity: activities[idx]
-  }));
-  return logs;
-}
-
-type Log = {
-  logId: number;
+export type Log = {
+  logId: string;
   date: Date;
-  activity: string;
+  activity: Activity;
+  notes: string | null;
 };
 
 export type GroupedLogs = {
@@ -23,9 +14,20 @@ export type GroupedLogs = {
   data: Log[];
 };
 
-export async function getLogsGroupedByDay() {
+const cache = new Map();
+
+export async function getLog(logId: string): Promise<Log> {
+  const sleepSecs = getRandom(0, 3);
+  const promise = new Promise((resolve) => {
+    setTimeout(() => resolve("done!"), sleepSecs * 1000);
+  });
+  await promise;
+
+  return cache.get(logId);
+}
+
+export async function getLogsGroupedByDay(): Promise<GroupedLogs[]> {
   const sleepSecs = getRandom(1, 4);
-  console.debug(`Will sleep for ${sleepSecs}.`);
 
   const promise = new Promise((resolve) => {
     setTimeout(() => resolve("done!"), sleepSecs * 1000);
@@ -48,9 +50,6 @@ export async function getLogsGroupedByDay() {
   const groupedLogs = [];
 
   // Add logs for today
-  console.debug(
-    `Adding logs for ${today} (${new Date(today)}) to ${now.getTime()} (${now})`
-  );
   groupedLogs.push({
     day: new Date(today).toString(),
     data: generateLogs(today, now.getTime())
@@ -61,9 +60,6 @@ export async function getLogsGroupedByDay() {
     const fromDay = currDay - millisInDay;
     const toDay = currDay;
 
-    console.debug(
-      `Adding logs for ${fromDay} (${new Date(fromDay)}) to ${toDay} (${new Date(toDay)})`
-    );
     groupedLogs.push({
       day: new Date(fromDay).toString(),
       data: generateLogs(fromDay, toDay)
@@ -72,4 +68,22 @@ export async function getLogsGroupedByDay() {
     currDay = fromDay;
   }
   return groupedLogs;
+}
+
+export function generateLogs(
+  fromTimestamp: number,
+  toTimestamp: number
+): Log[] {
+  const dates = generateDates(fromTimestamp, toTimestamp);
+  const activities = generateActivities(dates.length);
+  const logs: Log[] = dates.map((date, idx) => ({
+    logId: date.getTime().toString(),
+    date: date,
+    activity: activities[idx],
+    notes: quotes[getRandom(0, quotes.length)]
+  }));
+  logs.forEach((log) => {
+    cache.set(log.logId, log);
+  });
+  return logs;
 }

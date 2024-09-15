@@ -4,13 +4,13 @@
 
 In no particular order -
 
-* [ ] Wire up `logs`, `activities`, and `profile` pages to the nav. Try to group entities together.
+* [x] Wire up `logs`, `activities`, and `profile` pages to the nav. Try to group entities together.
 
-* [ ] Iteratively design/build the `logs` page with a list of past logs. This page should have an `Add` button. Get the first draft of the `Log` entity design.
+* [x] Iteratively design/build the `logs` page with a list of past logs. This page should have an `Add` button. Get the first draft of the `Log` entity design.
 
-* [ ] Implement an async `getLogs` function.
+* [x] Implement an async `getLogs` function.
 
-* [ ] Wire up `getLogs` with `logs` page. Probably will need more tweaking of both the page and the API.
+* [x] Wire up `getLogs` with `logs` page. Probably will need more tweaking of both the page and the API.
 
 * [ ] Iteratively design/build the `ShowLog` page.
 

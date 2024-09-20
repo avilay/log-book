@@ -12,11 +12,11 @@ In no particular order -
 
 * [x] Wire up `getLogs` with `logs` page. Probably will need more tweaking of both the page and the API.
 
-* [ ] Iteratively design/build the `ShowLog` page.
+* [x] Iteratively design/build the `ShowLog` page.
 
-* [ ] Implement an async `getLogDetails` function.
+* [ ] ~~Implement an async `getLogDetails` function.~~
 
-* [ ] Wire up `getLogDetails` to `ShowLog`.
+* [ ] ~~Wire up `getLogDetails` to `ShowLog`.~~
 
 * [ ] Iteratively design/build the `AddLog` page with an Expo Router Modal component.
 

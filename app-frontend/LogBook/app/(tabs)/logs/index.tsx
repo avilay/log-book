@@ -1,5 +1,5 @@
 // import { Link } from "expo-router";
-import { Link } from "expo-router";
+import { Link, useFocusEffect } from "expo-router";
 import {
   Text,
   SafeAreaView,
@@ -8,29 +8,49 @@ import {
   StyleSheet
 } from "react-native";
 import { formatDate, formatTime } from "@/lib/utils";
-import { getLogsGroupedByDay, GroupedLogs } from "@/lib/model/log";
-import { useEffect, useState } from "react";
+import { getLogsGroupedByDay, Log } from "@/lib/model/log";
+import { useCallback, useState } from "react";
 import Spinner from "@/components/Spinner";
 
-export default function LogsIndex() {
-  const [groupedLogs, setGroupedLogs] = useState<GroupedLogs[]>([]);
+type SectionedLogs = {
+  day: string;
+  data: Log[];
+};
 
-  useEffect(() => {
-    async function getLogs() {
-      const logs = await getLogsGroupedByDay();
-      setGroupedLogs(logs);
-    }
-    console.debug("Getting logs in logs/index effect");
-    getLogs();
-  }, []);
+export default function LogsIndex() {
+  const [sectionedLogs, setSectionedLogs] = useState<SectionedLogs[]>([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      let ignore = false;
+
+      async function getLogs() {
+        const glogs = await getLogsGroupedByDay();
+        if (!ignore) {
+          const slogs: SectionedLogs[] = glogs.map((groupedLog) => {
+            return {
+              day: groupedLog.day.toString(),
+              data: groupedLog.logs
+            };
+          });
+          setSectionedLogs(slogs);
+        }
+      }
+      getLogs();
+
+      return () => {
+        ignore = true;
+      };
+    }, [])
+  );
 
   let content = <></>;
-  if (groupedLogs.length == 0) {
+  if (sectionedLogs.length == 0) {
     content = <Spinner />;
   } else {
     content = (
       <SectionList
-        sections={groupedLogs}
+        sections={sectionedLogs}
         keyExtractor={(log) => log.logId}
         renderItem={({ item }) => (
           <Link href={`/logs/${item.logId}`}>
@@ -70,10 +90,10 @@ const styles = StyleSheet.create({
     fontSize: 18
   },
   item: {
-    padding: 5,
-    marginBottom: 5
+    paddingLeft: 15,
+    paddingTop: 10
   },
   itemText: {
-    fontSize: 18
+    // fontSize: 18
   }
 });

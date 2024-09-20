@@ -1,43 +1,27 @@
-import { getRandom } from "../utils";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export type Activity = {
   activityId: string;
   name: string;
 };
 
-const ACTIVITIES = [
-  {
-    activityId: "1",
-    name: "Run"
-  },
-  {
-    activityId: "2",
-    name: "Take Medication"
-  },
-  {
-    activityId: "3",
-    name: "Gym"
-  },
-  {
-    activityId: "4",
-    name: "Meditate"
-  },
-  {
-    activityId: "5",
-    name: "Dishes"
-  },
-  {
-    activityId: "6",
-    name: "Gratitude"
+export async function getActivity(activityId: string) {
+  const activityJson = await AsyncStorage.getItem(activityId);
+  if (activityJson != null) {
+    const activity: Activity = JSON.parse(activityJson);
+    return activity;
+  } else {
+    throw Error(`Activity id ${activityId} not found!`);
   }
-];
+}
 
-export function generateActivities(len: number): Activity[] {
-  const chooseFrom = ACTIVITIES.length - 1;
-  const chosenActivities = [];
-  for (let i = 0; i < len; i++) {
-    const idx = getRandom(0, chooseFrom);
-    chosenActivities.push(ACTIVITIES[idx]);
+export async function getActivities() {
+  const activities: Activity[] = [];
+  const keys = await AsyncStorage.getAllKeys();
+  const activityIds = keys.filter((key) => key.startsWith("activity-"));
+  for (const activityId of activityIds) {
+    const activity = await getActivity(activityId);
+    activities.push(activity);
   }
-  return chosenActivities;
+  return activities;
 }

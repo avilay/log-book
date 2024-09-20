@@ -1,6 +1,5 @@
-import { generateDates, getRandom } from "../utils";
-import { generateActivities, Activity } from "./activity";
-import quotes from "./quotes.json";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Activity } from "./activity";
 
 export type Log = {
   logId: string;
@@ -10,80 +9,92 @@ export type Log = {
 };
 
 export type GroupedLogs = {
-  day: string;
-  data: Log[];
+  day: Date;
+  logs: Log[];
 };
 
-const cache = new Map();
-
-export async function getLog(logId: string): Promise<Log> {
-  const sleepSecs = getRandom(0, 3);
-  const promise = new Promise((resolve) => {
-    setTimeout(() => resolve("done!"), sleepSecs * 1000);
-  });
-  await promise;
-
-  return cache.get(logId);
+export async function deleteLog(logId: string) {
+  const key = `log-${logId}`;
+  await AsyncStorage.removeItem(key);
 }
 
-export async function getLogsGroupedByDay(): Promise<GroupedLogs[]> {
-  const sleepSecs = getRandom(1, 4);
+export async function addLog(log: Log) {
+  const key = `log-${log.logId}`;
+  await AsyncStorage.setItem(key, JSON.stringify(log));
+}
 
-  const promise = new Promise((resolve) => {
-    setTimeout(() => resolve("done!"), sleepSecs * 1000);
-  });
+export async function editLog(log: Log) {
+  await deleteLog(log.logId);
+  await addLog(log);
+}
 
-  await promise;
-
-  const millisInDay = 24 * 60 * 60 * 1000;
-  const numDays = getRandom(3, 10);
-
-  const now = new Date();
-  const today = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate()
-  ).getTime();
-
-  const firstDay = today - numDays * millisInDay;
-  let currDay = today;
-  const groupedLogs = [];
-
-  // Add logs for today
-  groupedLogs.push({
-    day: new Date(today).toString(),
-    data: generateLogs(today, now.getTime())
-  });
-
-  // Go back from today to first day and add logs for each day
-  while (currDay >= firstDay) {
-    const fromDay = currDay - millisInDay;
-    const toDay = currDay;
-
-    groupedLogs.push({
-      day: new Date(fromDay).toString(),
-      data: generateLogs(fromDay, toDay)
-    });
-
-    currDay = fromDay;
+export async function getLog(logId: string) {
+  const key = `log-${logId}`;
+  const logJson = await AsyncStorage.getItem(key);
+  if (logJson != null) {
+    const log: Log = JSON.parse(logJson);
+    // @ts-expect-error:next-line
+    log.date = new Date(Date.parse(log.date));
+    return log;
+  } else {
+    throw Error(`Log id ${logId} not found in async storage!`);
   }
-  return groupedLogs;
 }
 
-export function generateLogs(
-  fromTimestamp: number,
-  toTimestamp: number
-): Log[] {
-  const dates = generateDates(fromTimestamp, toTimestamp);
-  const activities = generateActivities(dates.length);
-  const logs: Log[] = dates.map((date, idx) => ({
-    logId: date.getTime().toString(),
-    date: date,
-    activity: activities[idx],
-    notes: quotes[getRandom(0, quotes.length)]
-  }));
+export async function getLogsGroupedByDay() {
+  // Get all the logs from async storage
+  const logs: Log[] = [];
+  const keys = await AsyncStorage.getAllKeys();
+  const logIds = keys
+    .filter((key) => key.startsWith("log-"))
+    .map((logId) => logId.slice(4));
+  for (const logId of logIds) {
+    const log = await getLog(logId);
+    logs.push(log);
+  }
+
+  // Group them by day
+  // Map.groupBy is not supported by Expo/React Native
+  // const groups = Map.groupBy(logs, (log) => {
+  //   const date = new Date(
+  //     log.date.getFullYear(),
+  //     log.date.getMonth(),
+  //     log.date.getDate()
+  //   );
+  //   return date.getTime();
+  // });
+  const groups = new Map();
   logs.forEach((log) => {
-    cache.set(log.logId, log);
+    const day = new Date(
+      log.date.getFullYear(),
+      log.date.getMonth(),
+      log.date.getDate()
+    ).getTime();
+    if (groups.has(day)) {
+      groups.get(day).push(log);
+    } else {
+      groups.set(day, [log]);
+    }
   });
-  return logs;
+
+  const groupedLogs: GroupedLogs[] = [];
+  groups.forEach((logs, timestamp) => {
+    const day = new Date(timestamp);
+    groupedLogs.push({
+      day: day,
+      logs: logs
+    });
+  });
+
+  return groupedLogs.sort((grp1, grp2) => {
+    const ts1 = grp1.day.getTime();
+    const ts2 = grp2.day.getTime();
+    if (ts1 < ts2) {
+      return 1;
+    } else if (ts1 == ts2) {
+      return 0;
+    } else {
+      return -1;
+    }
+  });
 }

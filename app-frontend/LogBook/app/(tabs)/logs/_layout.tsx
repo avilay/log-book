@@ -20,7 +20,7 @@ export default function LogsLayout() {
           }
         }}
       />
-      <Stack.Screen name="[logId]" options={{ headerTitle: "Log Details" }} />
+      {/* <Stack.Screen name="[logId]" options={{ headerTitle: "Log Details" }} /> */}
       <Stack.Screen name="add" options={{ presentation: "modal" }} />
       <Stack.Screen name="edit" options={{ presentation: "modal" }} />
     </Stack>

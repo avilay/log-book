@@ -1,28 +1,3 @@
-export function getRandom(a: number, b: number) {
-  const x = Math.floor(Math.random() * b);
-  return x < a ? x + a : x;
-}
-
-export function generateDates(fromTimestamp: number, toTimestamp: number) {
-  const diff = toTimestamp - fromTimestamp;
-  const dates = [];
-  const numDates = getRandom(3, 10);
-  for (let i = 0; i < numDates; i++) {
-    const timestamp = fromTimestamp + getRandom(0, diff);
-    const dt = new Date(timestamp);
-    dates.push(dt);
-  }
-  return dates.sort((a, b) => {
-    if (a.getTime() > b.getTime()) {
-      return -1;
-    } else if (a.getTime() == b.getTime()) {
-      return 0;
-    } else {
-      return 1;
-    }
-  });
-}
-
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const MONTHS = [

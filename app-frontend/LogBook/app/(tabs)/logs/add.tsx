@@ -47,7 +47,7 @@ export default function AddLog() {
 
   async function onAdd() {
     log.logId = log.date.getTime().toString();
-    await addLog(log!);
+    await addLog(log);
     router.back();
   }
 
@@ -55,6 +55,8 @@ export default function AddLog() {
     <SafeAreaView style={styles.container}>
       <Stack.Screen
         options={{
+          // presentation only works when specified in _layout
+          // presentation: "modal",
           headerTitle: "Add Log",
           headerLeft: () => {
             return (

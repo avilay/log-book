@@ -47,7 +47,7 @@ export async function getLogsGroupedByDay() {
   const keys = await AsyncStorage.getAllKeys();
   const logIds = keys
     .filter((key) => key.startsWith("log-"))
-    .map((logId) => logId.slice(4));
+    .map((logId) => logId.slice("log-".length));
   for (const logId of logIds) {
     const log = await getLog(logId);
     logs.push(log);
@@ -77,24 +77,27 @@ export async function getLogsGroupedByDay() {
     }
   });
 
+  // Re-package them as an array of GroupedLogs
   const groupedLogs: GroupedLogs[] = [];
   groups.forEach((logs: Log[], timestamp: number) => {
     const day = new Date(timestamp);
     groupedLogs.push({
       day: day,
-      logs: logs.sort((a, b) => {
-        if (a.date.getTime() > b.date.getTime()) {
+      logs: logs.sort((a: Log, b: Log) => {
+        const tsa = a.date.getTime();
+        const tsb = b.date.getTime();
+        if (tsa < tsb) {
           return 1;
-        } else if (a.date.getTime() == b.date.getTime()) {
+        } else if (tsa == tsb) {
           return 0;
         } else {
-          return 0;
+          return -1;
         }
       })
     });
   });
 
-  return groupedLogs.sort((grp1, grp2) => {
+  return groupedLogs.sort((grp1: GroupedLogs, grp2: GroupedLogs) => {
     const ts1 = grp1.day.getTime();
     const ts2 = grp2.day.getTime();
     if (ts1 < ts2) {

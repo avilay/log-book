@@ -11,7 +11,7 @@ import {
   useLocalSearchParams
 } from "expo-router";
 import { useCallback, useState } from "react";
-import { SafeAreaView, Pressable, StyleSheet } from "react-native";
+import { SafeAreaView, Pressable, StyleSheet, Text } from "react-native";
 import RNDateTimePicker from "undefined";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Item from "@/components/Item";
@@ -66,21 +66,25 @@ function EditForm({ log, onLogChange }: EditFormProps) {
       </Item>
 
       <Item label="Activity:">
-        <Dropdown
-          data={activities}
-          labelField="name"
-          valueField="activityId"
-          value={allActivities.get(log.activity.activityId)}
-          onChange={(item) => {
-            const editedLog = {
-              logId: log.logId,
-              date: log.date,
-              activity: item,
-              notes: log.notes
-            };
-            onLogChange(editedLog);
-          }}
-        />
+        {allActivities.has(log.activity.activityId) ? (
+          <Dropdown
+            data={activities}
+            labelField="name"
+            valueField="activityId"
+            value={allActivities.get(log.activity.activityId)}
+            onChange={(item) => {
+              const editedLog = {
+                logId: log.logId,
+                date: log.date,
+                activity: item,
+                notes: log.notes
+              };
+              onLogChange(editedLog);
+            }}
+          />
+        ) : (
+          <Text style={{ color: "gray" }}>{log.activity.name}</Text>
+        )}
       </Item>
 
       <Item label="Notes:">
@@ -138,11 +142,7 @@ export default function EditLog() {
           headerTitle: "Edit Log",
           headerLeft: () => {
             return (
-              <Pressable
-                onPress={() => {
-                  router.back();
-                }}
-              >
+              <Pressable onPress={router.back}>
                 <HeaderNavText>Cancel</HeaderNavText>
               </Pressable>
             );

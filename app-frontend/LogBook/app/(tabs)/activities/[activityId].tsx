@@ -5,55 +5,36 @@ import {
   useFocusEffect,
   useLocalSearchParams
 } from "expo-router";
-import { useCallback, useState } from "react";
 import {
+  StyleSheet,
   Text,
   SafeAreaView,
-  StyleSheet,
   View,
   Pressable,
   Alert
 } from "react-native";
-import { Log, deleteLog, getLog } from "@/lib/model/log";
-import Spinner from "@/components/Spinner";
-import { formatDate, formatTime } from "@/lib/utils";
 import HeaderNavText from "@/components/HeaderNavText";
 import { styles as headerNavTextStyles } from "@/components/HeaderNavText";
+import { Activity, deleteActivity, getActivity } from "@/lib/model/activity";
+import { useCallback, useState } from "react";
+import Spinner from "@/components/Spinner";
 import Item from "@/components/Item";
 
-export default function LogsShow() {
-  const { logId } = useLocalSearchParams<{ logId: string }>();
-
-  const [log, setLog] = useState<Log | null>(null);
-
-  function handleDelete() {
-    Alert.alert("Are you sure?", "You will lose this log completely.", [
-      {
-        text: "Cancel",
-        style: "cancel"
-      },
-      {
-        text: "Yes. Delete!",
-        style: "destructive",
-        onPress: async () => {
-          await deleteLog(logId);
-          router.back();
-        }
-      }
-    ]);
-  }
+export default function ActivitiesShow() {
+  const { activityId } = useLocalSearchParams<{ activityId: string }>();
+  const [activity, setActivity] = useState<Activity | null>(null);
 
   useFocusEffect(
     useCallback(() => {
       let ignore = false;
 
-      async function _getLog() {
-        const _log = await getLog(logId);
+      async function _getActivity() {
+        const _activity = await getActivity(activityId);
         if (!ignore) {
-          setLog(_log);
+          setActivity(_activity);
         }
       }
-      _getLog();
+      _getActivity();
 
       return () => {
         ignore = true;
@@ -61,24 +42,35 @@ export default function LogsShow() {
     }, [])
   );
 
+  function handleDelete() {
+    Alert.alert(
+      "Are you sure?",
+      "Logs related to this activity will still be visible. You won't be able to add new logs with this activity.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Yes. Delete!",
+          style: "destructive",
+          onPress: async () => {
+            await deleteActivity(activityId);
+            router.back();
+          }
+        }
+      ]
+    );
+  }
+
   let content = <></>;
-  if (!log) {
+  if (!activity) {
     content = <Spinner />;
   } else {
     content = (
       <View style={{ flexGrow: 1 }}>
-        <Item label="Timestamp:">
-          <Text>
-            {formatDate(log.date)} {formatTime(log.date)}
-          </Text>
-        </Item>
-
-        <Item label="Activity:">
-          <Text>{log.activity.name}</Text>
-        </Item>
-
-        <Item label="Notes:">
-          <Text>{log.notes}</Text>
+        <Item label="Name:">
+          <Text>{activity.name}</Text>
         </Item>
       </View>
     );
@@ -88,14 +80,14 @@ export default function LogsShow() {
     <SafeAreaView style={styles.container}>
       <Stack.Screen
         options={{
-          headerTitle: "Log Details",
+          headerTitle: "Activity",
           headerBackTitleStyle: {
             fontSize: headerNavTextStyles.headerLink.fontSize
           },
           headerRight: () => {
             return (
               <View>
-                <Link href={`/logs/edit?logId=${logId}`}>
+                <Link href={`/activities/edit?activityId=${activityId}`}>
                   <HeaderNavText>Edit</HeaderNavText>
                 </Link>
               </View>
@@ -105,7 +97,7 @@ export default function LogsShow() {
       />
       {content}
       <Pressable onPress={handleDelete}>
-        <Text style={styles.delete}>Delete Log</Text>
+        <Text style={styles.delete}>Delete Activity</Text>
       </Pressable>
     </SafeAreaView>
   );

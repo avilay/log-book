@@ -27,6 +27,9 @@
     },
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "dbName": "log-book"
+    }
   }
 }

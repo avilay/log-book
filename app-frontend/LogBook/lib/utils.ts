@@ -1,3 +1,5 @@
+import * as SQLite from "expo-sqlite";
+
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const MONTHS = [
@@ -54,4 +56,22 @@ export function formatTime(date: Date) {
   }
 
   return isAM ? `${hrsStr}:${minsStr} AM` : `${hrsStr}:${minsStr} PM`;
+}
+
+export async function setupDb(dbName: string) {
+  const db = await SQLite.openDatabaseAsync(dbName);
+  await db.execAsync(`
+  PRAGMA journal_mode = WAL;
+  CREATE TABLE IF NOT EXISTS activities (
+    activity_id TEXT PRIMARY KEY,
+    name TEXT
+  );
+  CREATE TABLE IF NOT EXISTS logs (
+    log_id TEXT PRIMARY KEY,
+    timestamp INTEGER,
+    notes TEXT,
+    activity_id TEXT,
+    FOREIGN KEY(activity_id) REFERENCES activities(activity_id)
+  );
+  `);
 }

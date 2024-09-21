@@ -45,19 +45,19 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="account"
+        name="settings"
         options={{
-          title: "Account",
+          title: "Settings",
           tabBarLabel: () => {
             return (
               <View style={styles.label}>
-                <Text>Account</Text>
+                <Text>Settings</Text>
               </View>
             );
           },
           tabBarIcon: ({ focused }) => (
             <MaterialCommunityIcons
-              name={focused ? "account-circle" : "account-circle-outline"}
+              name={focused ? "cog" : "cog-outline"}
               size={24}
             />
           )

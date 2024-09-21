@@ -1,7 +1,8 @@
 import { Activity } from "./model/activity";
 import { Log } from "./model/log";
 import quotes from "./quotes.json";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SQLite from "expo-sqlite";
 
 const ACTIVITIES = [
   {
@@ -81,7 +82,7 @@ export function generateLogs(
   return logs;
 }
 
-export async function generateTestData() {
+export async function generateTestData(dbName: string) {
   const millisInDay = 24 * 60 * 60 * 1000;
   const numDays = getRandom(3, 10);
 
@@ -95,17 +96,65 @@ export async function generateTestData() {
   const firstDayTimestamp = todayTimestamp - numDays * millisInDay;
   const logs = generateLogs(firstDayTimestamp, now.getTime());
 
-  // Store the logs in async storage
-  await AsyncStorage.clear();
-  logs.forEach((log) => {
-    const key = `log-${log.logId}`;
-    AsyncStorage.setItem(key, JSON.stringify(log));
-  });
-  // return logs;
-
   // Store all activities in async storage
+  // ACTIVITIES.forEach((activity) => {
+  //   const key = `activity-${activity.activityId}`;
+  //   AsyncStorage.setItem(key, JSON.stringify(activity));
+  // });
+
+  const db = SQLite.openDatabaseSync(dbName);
+
+  // clean up old data from db
+  db.runSync("DELETE FROM logs");
+  db.runSync("DELETE FROM activities");
+
+  // Store all activities to db
+  const insertActivity = db.prepareSync(
+    "INSERT INTO activities (activity_id, name) VALUES ($activityId, $name)"
+  );
   ACTIVITIES.forEach((activity) => {
-    const key = `activity-${activity.activityId}`;
-    AsyncStorage.setItem(key, JSON.stringify(activity));
+    try {
+      insertActivity.executeSync({
+        $activityId: activity.activityId,
+        $name: activity.name
+      });
+    } catch (err) {
+      console.debug("Unable to add activity -");
+      console.debug(activity);
+      console.debug(err);
+    }
   });
+  insertActivity.finalizeSync();
+  console.info("Added activities");
+
+  // Store the logs in async storage
+  // await AsyncStorage.clear();
+  // logs.forEach((log) => {
+  //   const key = `log-${log.logId}`;
+  //   AsyncStorage.setItem(key, JSON.stringify(log));
+  // });
+
+  // Store all logs to db
+  const insertLog = db.prepareSync(`
+  INSERT INTO logs (log_id, timestamp, notes, activity_id)
+  VALUES ($logId, $timestamp, $notes, $activityId)
+  `);
+  logs.forEach((log) => {
+    try {
+      insertLog.executeSync({
+        $logId: log.logId,
+        $timestamp: log.date.getTime(),
+        $notes: log.notes,
+        $activityId: log.activity.activityId
+      });
+    } catch (err) {
+      console.debug("Unable to add log -");
+      console.debug(log);
+      console.debug(err);
+    }
+  });
+  insertLog.finalizeSync();
+  console.info("Added logs");
+
+  // return logs;
 }

@@ -11,9 +11,10 @@ import {
   useLocalSearchParams
 } from "expo-router";
 import { useCallback, useState } from "react";
-import { SafeAreaView, Pressable, View, StyleSheet, Text } from "react-native";
+import { SafeAreaView, Pressable, StyleSheet } from "react-native";
 import RNDateTimePicker from "undefined";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import Item from "@/components/Item";
 
 type EditFormProps = {
   log: Log;
@@ -47,9 +48,8 @@ function EditForm({ log, onLogChange }: EditFormProps) {
   });
 
   return (
-    <KeyboardAwareScrollView>
-      <View style={styles.item}>
-        <Text style={styles.label}>Timestamp:</Text>
+    <KeyboardAwareScrollView extraScrollHeight={50}>
+      <Item label="Timestamp:">
         <RNDateTimePicker
           mode="datetime"
           value={log.date}
@@ -63,10 +63,9 @@ function EditForm({ log, onLogChange }: EditFormProps) {
             onLogChange(editedLog);
           }}
         />
-      </View>
+      </Item>
 
-      <View style={styles.item}>
-        <Text style={styles.label}>Activity:</Text>
+      <Item label="Activity:">
         <Dropdown
           data={activities}
           labelField="name"
@@ -82,13 +81,12 @@ function EditForm({ log, onLogChange }: EditFormProps) {
             onLogChange(editedLog);
           }}
         />
-      </View>
+      </Item>
 
-      <View style={styles.item}>
-        <Text style={styles.label}>Notes:</Text>
+      <Item label="Notes:">
         <MultiLineTextInput
           value={log.notes ?? ""}
-          onInputDone={(value) => {
+          onChangeText={(value) => {
             const editedLog = {
               logId: log.logId,
               date: log.date,
@@ -98,7 +96,7 @@ function EditForm({ log, onLogChange }: EditFormProps) {
             onLogChange(editedLog);
           }}
         />
-      </View>
+      </Item>
     </KeyboardAwareScrollView>
   );
 }
@@ -167,15 +165,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginHorizontal: 25,
-    alignItems: "flex-start"
-  },
-  label: {
-    fontWeight: "bold",
-    marginTop: 10,
-    marginBottom: 7
-  },
-  item: {
-    marginTop: 20,
-    marginBottom: 30
+    alignItems: "stretch"
   }
 });

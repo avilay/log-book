@@ -78,11 +78,19 @@ export async function getLogsGroupedByDay() {
   });
 
   const groupedLogs: GroupedLogs[] = [];
-  groups.forEach((logs, timestamp) => {
+  groups.forEach((logs: Log[], timestamp: number) => {
     const day = new Date(timestamp);
     groupedLogs.push({
       day: day,
-      logs: logs
+      logs: logs.sort((a, b) => {
+        if (a.date.getTime() > b.date.getTime()) {
+          return 1;
+        } else if (a.date.getTime() == b.date.getTime()) {
+          return 0;
+        } else {
+          return 0;
+        }
+      })
     });
   });
 

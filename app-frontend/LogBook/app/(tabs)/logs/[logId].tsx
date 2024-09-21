@@ -19,6 +19,7 @@ import Spinner from "@/components/Spinner";
 import { formatDate, formatTime } from "@/lib/utils";
 import HeaderNavText from "@/components/HeaderNavText";
 import { styles as headerNavTextStyles } from "@/components/HeaderNavText";
+import Item from "@/components/Item";
 
 export default function LogsShow() {
   const { logId } = useLocalSearchParams<{ logId: string }>();
@@ -65,22 +66,19 @@ export default function LogsShow() {
   } else {
     content = (
       <View style={{ flexGrow: 1 }}>
-        <View style={styles.item}>
-          <Text style={styles.label}>Timestamp:</Text>
+        <Item label="Timestamp:">
           <Text>
             {formatDate(log.date)} {formatTime(log.date)}
           </Text>
-        </View>
+        </Item>
 
-        <View style={styles.item}>
-          <Text style={styles.label}>Activity:</Text>
+        <Item label="Activity:">
           <Text>{log.activity.name}</Text>
-        </View>
+        </Item>
 
-        <View style={styles.item}>
-          <Text style={styles.label}>Notes:</Text>
+        <Item label="Notes:">
           <Text>{log.notes}</Text>
-        </View>
+        </Item>
       </View>
     );
   }
@@ -116,15 +114,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginHorizontal: 25
-  },
-  label: {
-    fontWeight: "bold",
-    marginTop: 10,
-    marginBottom: 7
-  },
-  item: {
-    marginTop: 20,
-    marginBottom: 30
   },
   delete: {
     color: "red",

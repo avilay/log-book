@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   TextInput,
   View,
@@ -11,24 +10,20 @@ type InputDoneHandler = (text: string) => void;
 
 export default function MultiLineTextInput({
   value,
-  onInputDone
+  onChangeText
 }: {
   value: string;
-  onInputDone: InputDoneHandler;
+  onChangeText: InputDoneHandler;
 }) {
-  const [text, setText] = useState<string>(value);
-
   return (
     <View style={styles.container}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.inner}>
           <TextInput
-            onChangeText={(txt) => setText(txt)}
-            value={text}
+            onChangeText={onChangeText}
+            value={value}
             multiline={true}
             numberOfLines={3}
-            onBlur={() => onInputDone(text)}
-            onEndEditing={() => onInputDone(text)}
           />
         </View>
       </TouchableWithoutFeedback>

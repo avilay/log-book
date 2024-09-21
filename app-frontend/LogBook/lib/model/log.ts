@@ -1,5 +1,8 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Activity } from "./activity";
+import * as SQLite from "expo-sqlite";
+import { getDbName } from "../utils";
+
+const db = SQLite.openDatabaseSync(getDbName());
 
 export type Log = {
   logId: string;
@@ -8,61 +11,109 @@ export type Log = {
   notes: string | null;
 };
 
+type SqlLog = {
+  log_id: string;
+  timestamp: number;
+  activity_id: string;
+  activity_name: string;
+  notes: string;
+};
+
 export type GroupedLogs = {
   day: Date;
   logs: Log[];
 };
 
 export async function deleteLog(logId: string) {
-  const key = `log-${logId}`;
-  await AsyncStorage.removeItem(key);
+  const sql = `
+  DELETE FROM logs WHERE log_id = $logId
+  `;
+  await db.runAsync(sql, { $logId: logId });
 }
 
 export async function addLog(log: Log) {
-  const key = `log-${log.logId}`;
-  await AsyncStorage.setItem(key, JSON.stringify(log));
+  const sql = `
+  INSERT INTO logs (log_id, timestamp, notes, activity_id)
+  VALUES ($logId, $timestamp, $notes, $activityId)
+  `;
+  await db.runAsync(sql, {
+    $logId: log.logId,
+    $timestamp: log.date.getTime(),
+    $notes: log.notes,
+    $activityId: log.activity.activityId
+  });
 }
 
 export async function editLog(log: Log) {
-  await deleteLog(log.logId);
-  await addLog(log);
+  const sql = `
+  UPDATE logs SET timestamp = $timestamp, notes = $notes, activity_id = $activityId
+  WHERE log_id = $logId
+  `;
+  await db.runAsync(sql, {
+    $logId: log.logId,
+    $timestamp: log.date.getTime(),
+    $notes: log.notes,
+    $activityId: log.activity.activityId
+  });
 }
 
 export async function getLog(logId: string) {
-  const key = `log-${logId}`;
-  const logJson = await AsyncStorage.getItem(key);
-  if (logJson != null) {
-    const log: Log = JSON.parse(logJson);
-    // @ts-expect-error:next-line
-    log.date = new Date(Date.parse(log.date));
+  const sql = `
+  SELECT
+    logs.log_id as log_id,
+    logs.timestamp as timestamp,
+    logs.activity_id as activity_id,
+    activities.name as activity_name,
+    logs.notes as notes
+  FROM logs, activities
+  WHERE logs.activity_id = activities.activity_id
+  AND logs.log_id = $logId
+  `;
+  const row = await db.getFirstAsync<SqlLog>(sql, { $logId: logId });
+  if (row) {
+    const log = {
+      logId: row.log_id,
+      date: new Date(row.timestamp),
+      activity: {
+        activityId: row.activity_id,
+        name: row.activity_name
+      },
+      notes: row.notes
+    };
     return log;
   } else {
-    throw Error(`Log id ${logId} not found in async storage!`);
+    throw Error(`Log with id ${logId} not found!`);
   }
 }
 
 export async function getLogsGroupedByDay() {
-  // Get all the logs from async storage
-  const logs: Log[] = [];
-  const keys = await AsyncStorage.getAllKeys();
-  const logIds = keys
-    .filter((key) => key.startsWith("log-"))
-    .map((logId) => logId.slice("log-".length));
-  for (const logId of logIds) {
-    const log = await getLog(logId);
-    logs.push(log);
-  }
+  // Get all the logs
+  const sql = `
+  SELECT
+    logs.log_id as log_id,
+    logs.timestamp as timestamp,
+    logs.activity_id as activity_id,
+    activities.name as activity_name,
+    logs.notes as notes
+  FROM logs, activities
+  WHERE logs.activity_id = activities.activity_id
+  `;
+  const rows = await db.getAllAsync<SqlLog>(sql);
+  const logs = rows.map((row) => {
+    return {
+      logId: row.log_id,
+      date: new Date(row.timestamp),
+      activity: {
+        activityId: row.activity_id,
+        name: row.activity_name
+      },
+      notes: row.notes
+    };
+  });
 
   // Group them by day
-  // Map.groupBy is not supported by Expo/React Native
-  // const groups = Map.groupBy(logs, (log) => {
-  //   const date = new Date(
-  //     log.date.getFullYear(),
-  //     log.date.getMonth(),
-  //     log.date.getDate()
-  //   );
-  //   return date.getTime();
-  // });
+  // May.groupBy is not supported by Expo/React Native
+  // Doing this the hard way
   const groups = new Map();
   logs.forEach((log) => {
     const day = new Date(

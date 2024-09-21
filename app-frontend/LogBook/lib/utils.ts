@@ -1,4 +1,6 @@
+import Constants from "expo-constants";
 import * as SQLite from "expo-sqlite";
+import { generateTestData } from "./devutils";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -74,4 +76,29 @@ export async function setupDb(dbName: string) {
     FOREIGN KEY(activity_id) REFERENCES activities(activity_id)
   );
   `);
+}
+
+export function getDbName() {
+  let dbName = "";
+  if (
+    Constants.expoConfig &&
+    Constants.expoConfig.extra &&
+    Constants.expoConfig.extra.dbName
+  ) {
+    dbName = Constants.expoConfig.extra.dbName;
+  } else {
+    console.warn("Db name not found in config. Falling back to default name.");
+    dbName = "default";
+  }
+  return dbName;
+}
+
+export function initializeApp() {
+  const dbName = getDbName();
+  setupDb(dbName);
+
+  if (process.env.EXPO_PUBLIC_ENV === "dev") {
+    console.log("Running in development environment. Generating test data.");
+    generateTestData(dbName);
+  }
 }

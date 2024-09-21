@@ -1,7 +1,6 @@
 import { Activity } from "./model/activity";
 import { Log } from "./model/log";
 import quotes from "./quotes.json";
-// import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SQLite from "expo-sqlite";
 
 const ACTIVITIES = [
@@ -96,12 +95,7 @@ export async function generateTestData(dbName: string) {
   const firstDayTimestamp = todayTimestamp - numDays * millisInDay;
   const logs = generateLogs(firstDayTimestamp, now.getTime());
 
-  // Store all activities in async storage
-  // ACTIVITIES.forEach((activity) => {
-  //   const key = `activity-${activity.activityId}`;
-  //   AsyncStorage.setItem(key, JSON.stringify(activity));
-  // });
-
+  // Persist generated data in sql
   const db = SQLite.openDatabaseSync(dbName);
 
   // clean up old data from db
@@ -127,13 +121,6 @@ export async function generateTestData(dbName: string) {
   insertActivity.finalizeSync();
   console.info("Added activities");
 
-  // Store the logs in async storage
-  // await AsyncStorage.clear();
-  // logs.forEach((log) => {
-  //   const key = `log-${log.logId}`;
-  //   AsyncStorage.setItem(key, JSON.stringify(log));
-  // });
-
   // Store all logs to db
   const insertLog = db.prepareSync(`
   INSERT INTO logs (log_id, timestamp, notes, activity_id)
@@ -155,6 +142,4 @@ export async function generateTestData(dbName: string) {
   });
   insertLog.finalizeSync();
   console.info("Added logs");
-
-  // return logs;
 }

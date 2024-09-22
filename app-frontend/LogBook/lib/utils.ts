@@ -78,6 +78,20 @@ export async function setupDb(dbName: string) {
   `);
 }
 
+export async function deleteAllData() {
+  const db = await SQLite.openDatabaseAsync(getDbName());
+
+  const delLogs = `
+  DELETE FROM logs
+  `;
+  await db.runAsync(delLogs);
+
+  const delActivities = `
+  DELETE FROM activities
+  `;
+  await db.runAsync(delActivities);
+}
+
 export function getDbName() {
   let dbName = "";
   if (

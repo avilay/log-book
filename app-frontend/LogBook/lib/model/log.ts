@@ -86,6 +86,33 @@ export async function getLog(logId: string) {
   }
 }
 
+export async function getAllLogs() {
+  const sql = `
+  SELECT
+    logs.log_id as log_id,
+    logs.timestamp as timestamp,
+    logs.activity_id as activity_id,
+    activities.name as activity_name,
+    logs.notes as notes
+  FROM logs, activities
+  WHERE logs.activity_id = activities.activity_id
+  ORDER BY log.timestamp
+  `;
+  const rows = await db.getAllAsync<SqlLog>(sql);
+  const logs = rows.map((row) => {
+    return {
+      logId: row.log_id,
+      date: new Date(row.timestamp),
+      activity: {
+        activityId: row.activity_id,
+        name: row.activity_name
+      },
+      notes: row.notes
+    };
+  });
+  return logs;
+}
+
 export async function getLogsGroupedByDay() {
   // Get all the logs
   const sql = `

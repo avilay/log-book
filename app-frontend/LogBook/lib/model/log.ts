@@ -1,6 +1,6 @@
 import { Activity } from "./activity";
 import * as SQLite from "expo-sqlite";
-import { getDbName } from "../utils";
+import { getDbName, simulateDelay } from "../utils";
 
 const db = SQLite.openDatabaseSync(getDbName());
 
@@ -25,6 +25,7 @@ export type GroupedLogs = {
 };
 
 export async function deleteLog(logId: string) {
+  await simulateDelay();
   const sql = `
   DELETE FROM logs WHERE log_id = $logId
   `;
@@ -32,6 +33,7 @@ export async function deleteLog(logId: string) {
 }
 
 export async function addLog(log: Log) {
+  await simulateDelay();
   const sql = `
   INSERT INTO logs (log_id, timestamp, notes, activity_id)
   VALUES ($logId, $timestamp, $notes, $activityId)
@@ -45,6 +47,7 @@ export async function addLog(log: Log) {
 }
 
 export async function editLog(log: Log) {
+  await simulateDelay();
   const sql = `
   UPDATE logs SET timestamp = $timestamp, notes = $notes, activity_id = $activityId
   WHERE log_id = $logId
@@ -58,6 +61,7 @@ export async function editLog(log: Log) {
 }
 
 export async function getLog(logId: string) {
+  await simulateDelay();
   const sql = `
   SELECT
     logs.log_id as log_id,
@@ -87,6 +91,7 @@ export async function getLog(logId: string) {
 }
 
 export async function getAllLogs() {
+  await simulateDelay();
   const sql = `
   SELECT
     logs.log_id as log_id,
@@ -114,6 +119,7 @@ export async function getAllLogs() {
 }
 
 export async function getLogsGroupedByDay() {
+  await simulateDelay();
   // Get all the logs
   const sql = `
   SELECT
@@ -186,4 +192,13 @@ export async function getLogsGroupedByDay() {
       return -1;
     }
   });
+}
+
+export async function countLogs() {
+  await simulateDelay();
+  const sql = `
+  SELECT COUNT(*) as logs_count FROM logs
+  `;
+  const row = await db.getFirstAsync<{ logs_count: number }>(sql);
+  return row ? row.logs_count : 0;
 }

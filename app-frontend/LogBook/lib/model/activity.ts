@@ -1,6 +1,5 @@
-// import AsyncStorage from "@react-native-async-storage/async-storage";;
 import * as SQLite from "expo-sqlite";
-import { getDbName } from "../utils";
+import { getDbName, simulateDelay } from "../utils";
 
 const db = SQLite.openDatabaseSync(getDbName());
 
@@ -9,24 +8,16 @@ export type Activity = {
   name: string;
 };
 
-// export async function deleteActivity(activityId: string) {
-//   const key = `activity-${activityId}`;
-//   await AsyncStorage.removeItem(key);
-// }
 export async function deleteActivity(activityId: string) {
+  await simulateDelay();
   const sql = `
   DELETE FROM activities WHERE activity_id = $activityId
   `;
   await db.runAsync(sql, { $activityId: activityId });
 }
 
-// export async function addActivity(activity: Activity) {
-//   const key = `activity-${activity.activityId}`;
-//   await AsyncStorage.setItem(key, JSON.stringify(activity));
-// }
 export async function addActivity(activity: Activity) {
-  console.debug("Adding activity -");
-  console.debug(activity);
+  await simulateDelay();
   const sql = `
   INSERT INTO activities (activity_id, name) VALUES ($activityId, $name)
   `;
@@ -36,11 +27,8 @@ export async function addActivity(activity: Activity) {
   });
 }
 
-// export async function editActivity(activity: Activity) {
-//   await deleteActivity(activity.activityId);
-//   await addActivity(activity);
-// }
 export async function editActivity(activity: Activity) {
+  await simulateDelay();
   const sql = `
   UPDATE activities SET name = $name WHERE activity_id = $activityId
   `;
@@ -50,17 +38,8 @@ export async function editActivity(activity: Activity) {
   });
 }
 
-// export async function getActivity(activityId: string) {
-//   const key = `activity-${activityId}`;
-//   const activityJson = await AsyncStorage.getItem(key);
-//   if (activityJson != null) {
-//     const activity: Activity = JSON.parse(activityJson);
-//     return activity;
-//   } else {
-//     throw Error(`Activity id ${activityId} not found!`);
-//   }
-// }
 export async function getActivity(activityId: string) {
+  await simulateDelay();
   const sql = `
   SELECT activity_id, name FROM activities
   WHERE activity_id = $activityId
@@ -80,19 +59,8 @@ export async function getActivity(activityId: string) {
   }
 }
 
-// export async function getActivities() {
-//   const activities: Activity[] = [];
-//   const keys = await AsyncStorage.getAllKeys();
-//   const activityIds = keys
-//     .filter((key) => key.startsWith("activity-"))
-//     .map((activityId) => activityId.slice("activity-".length));
-//   for (const activityId of activityIds) {
-//     const activity = await getActivity(activityId);
-//     activities.push(activity);
-//   }
-//   return activities;
-// }
 export async function getActivities() {
+  await simulateDelay();
   const sql = `
   SELECT activity_id, name FROM activities
   `;
@@ -104,4 +72,13 @@ export async function getActivities() {
     };
   });
   return activities;
+}
+
+export async function countActivities() {
+  await simulateDelay();
+  const sql = `
+  SELECT COUNT(*) as activities_count FROM activities
+  `;
+  const row = await db.getFirstAsync<{ activities_count: number }>(sql);
+  return row ? row.activities_count : 0;
 }

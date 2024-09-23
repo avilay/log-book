@@ -1,6 +1,6 @@
 import Constants from "expo-constants";
 import * as SQLite from "expo-sqlite";
-import { generateTestData } from "./devutils";
+import { generateTestData, getRandom } from "./devutils";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -114,5 +114,21 @@ export function initializeApp() {
   if (process.env.EXPO_PUBLIC_ENV === "dev") {
     console.log("Running in development environment. Generating test data.");
     generateTestData(dbName);
+  }
+}
+
+export async function simulateDelay() {
+  if (
+    process.env.EXPO_PUBLIC_ENV === "dev" &&
+    process.env.EXPO_PUBLIC_SIM_DELAY === "true"
+  ) {
+    console.debug(`Value of ENV = ${process.env.EXPO_PUBLIC_ENV}`);
+    console.debug(`Value of SIM_DELAY = ${process.env.EXPO_PUBLIC_SIM_DELAY}`);
+    const sleepSecs = getRandom(2, 5);
+    console.debug(`Simulating delay of ${sleepSecs} seconds.`);
+    const promise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), sleepSecs * 1000);
+    });
+    await promise;
   }
 }

@@ -78,18 +78,18 @@ export async function setupDb(dbName: string) {
   `);
 }
 
-export async function deleteAllData() {
-  const db = await SQLite.openDatabaseAsync(getDbName());
+export function deleteAllData() {
+  const db = SQLite.openDatabaseSync(getDbName());
 
   const delLogs = `
   DELETE FROM logs
   `;
-  await db.runAsync(delLogs);
+  db.runSync(delLogs);
 
   const delActivities = `
   DELETE FROM activities
   `;
-  await db.runAsync(delActivities);
+  db.runSync(delActivities);
 }
 
 export function getDbName() {
@@ -110,6 +110,7 @@ export function getDbName() {
 export function initializeApp() {
   const dbName = getDbName();
   setupDb(dbName);
+  deleteAllData();
 
   if (process.env.EXPO_PUBLIC_ENV === "dev") {
     console.log("Running in development environment. Generating test data.");

@@ -28,8 +28,8 @@ export default function Settings() {
         {
           text: "Yes. Delete EVERYTHING!",
           style: "destructive",
-          onPress: async () => {
-            await deleteAllData();
+          onPress: () => {
+            deleteAllData();
           }
         }
       ]

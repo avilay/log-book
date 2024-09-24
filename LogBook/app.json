@@ -13,7 +13,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "rocks.avilay.LogBook"
     },
     "android": {
       "adaptiveIcon": {
@@ -29,7 +30,10 @@
       "expo-router"
     ],
     "extra": {
-      "dbName": "log-book"
+      "dbName": "log-book",
+      "eas": {
+        "projectId": "29fae5c0-cc61-4ce9-a8c6-6a31dac7ee42"
+      }
     }
   }
 }

@@ -1,0 +1,37 @@
+{
+  "cli": {
+    "version": ">= 12.4.1",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+      	"EXPO_PUBLIC_ENV": "prod",
+      	"EXPO_PUBLIC_SIM_DELAY": "false"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+      	"EXPO_PUBLIC_ENV": "prod",
+      	"EXPO_PUBLIC_SIM_DELAY": "false"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+      	"EXPO_PUBLIC_ENV": "prod",
+      	"EXPO_PUBLIC_SIM_DELAY": "false"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "6714371529"
+      }
+    }
+  }
+}

@@ -4,6 +4,7 @@ import { countLogs } from "@/lib/model/log";
 import { Link, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
   Button,
@@ -33,9 +34,9 @@ function ActivityList({ activities }: { activities: Activity[] }) {
 
 export default function ActivityIndex() {
   const [activities, setActivities] = useState<Activity[] | null>(null);
-  const [showTutorialNoActivities, setShowTutorialNoActivities] =
-    useState(false);
-  const [showTutorialNoLogs, setShowTutorialNoLogs] = useState(false);
+
+  const [showTut1, setShowTut1] = useState(false);
+  const [showTut2, setShowTut2] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -44,14 +45,22 @@ export default function ActivityIndex() {
       async function _getActivities() {
         const _activities = await getActivities();
         const _numLogs = await countLogs();
+        const isTut1Shown = await AsyncStorage.getItem(
+          "is_activity_tut1_shown"
+        );
+        const isTut2Shown = await AsyncStorage.getItem(
+          "is_activity_tut2_shown"
+        );
         if (!ignore) {
           setActivities(_activities);
-          if (_activities.length == 0) {
-            setShowTutorialNoActivities(true);
-            setShowTutorialNoLogs(false);
-          } else if (_numLogs == 0) {
-            setShowTutorialNoActivities(false);
-            setShowTutorialNoLogs(true);
+          if (_activities.length == 0 && !isTut1Shown) {
+            setShowTut1(true);
+            setShowTut2(false);
+            AsyncStorage.setItem("is_activity_tut1_shown", "true");
+          } else if (_activities.length > 0 && _numLogs == 0 && !isTut2Shown) {
+            setShowTut1(false);
+            setShowTut2(true);
+            AsyncStorage.setItem("is_activity_tut2_shown", "true");
           }
         }
       }
@@ -67,8 +76,10 @@ export default function ActivityIndex() {
     <Modal
       animationType="slide"
       transparent={true}
-      visible={showTutorialNoActivities}
-      onRequestClose={() => setShowTutorialNoActivities(false)}
+      visible={showTut1}
+      onRequestClose={() => {
+        setShowTut1(false);
+      }}
     >
       <View style={styles.modalContainer}>
         <View style={styles.modalView}>
@@ -85,7 +96,7 @@ export default function ActivityIndex() {
           <Button
             title="Got it!"
             onPress={() => {
-              setShowTutorialNoActivities(false);
+              setShowTut1(false);
             }}
           />
         </View>
@@ -97,13 +108,16 @@ export default function ActivityIndex() {
     <Modal
       animationType="slide"
       transparent={true}
-      visible={showTutorialNoLogs}
-      onRequestClose={() => setShowTutorialNoLogs(false)}
+      visible={showTut2}
+      onRequestClose={() => {
+        setShowTut2(false);
+      }}
     >
       <View style={styles.modalContainer}>
         <View style={styles.modalView}>
           <Text style={styles.modalText}>
-            Great, you have already added some activties. Now head over to the{" "}
+            Good job on adding an activity. You can continue to add more
+            activities, or head over to the{" "}
             <Text style={{ fontStyle: "italic" }}>Logs</Text> tab to log these
             activities as you do them.
           </Text>
@@ -115,7 +129,7 @@ export default function ActivityIndex() {
           <Button
             title="Got it!"
             onPress={() => {
-              setShowTutorialNoLogs(false);
+              setShowTut2(false);
             }}
           />
         </View>

@@ -1,6 +1,7 @@
 import Constants from "expo-constants";
 import * as SQLite from "expo-sqlite";
 import { generateTestData, getRandom } from "./devutils";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -113,8 +114,15 @@ export function initializeApp() {
   deleteAllData();
 
   if (process.env.EXPO_PUBLIC_ENV === "dev") {
-    console.log("Running in development environment. Generating test data.");
-    generateTestData(dbName);
+    console.info("Running in dev environment.");
+
+    if (process.env.EXPO_PUBLIC_GEN_DATA === "true") {
+      console.info("Generating test data.");
+      generateTestData(dbName);
+    }
+
+    console.info("Clearing all of async storage.");
+    AsyncStorage.clear();
   }
 }
 

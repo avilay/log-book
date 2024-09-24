@@ -14,6 +14,7 @@ import { getLogsGroupedByDay, Log } from "@/lib/model/log";
 import { useCallback, useState } from "react";
 import Spinner from "@/components/Spinner";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type SectionedLogs = {
   day: string;
@@ -54,6 +55,7 @@ export default function LogsIndex() {
 
       async function getLogs() {
         const glogs = await getLogsGroupedByDay();
+        const isTutShown = await AsyncStorage.getItem("is_log_tut_shown");
         if (!ignore) {
           const slogs: SectionedLogs[] = glogs.map((groupedLog) => {
             return {
@@ -62,7 +64,7 @@ export default function LogsIndex() {
             };
           });
           setSectionedLogs(slogs);
-          if (slogs.length == 0) {
+          if (slogs.length == 0 && !isTutShown) {
             setShowTutorial(true);
           }
         }

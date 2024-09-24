@@ -23,7 +23,8 @@
       "autoIncrement": true,
       "env": {
       	"EXPO_PUBLIC_ENV": "prod",
-      	"EXPO_PUBLIC_SIM_DELAY": "false"
+      	"EXPO_PUBLIC_SIM_DELAY": "false",
+        "EXPO_PUBLIC_GEN_DATA": "false"
       }
     }
   },

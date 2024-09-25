@@ -9,13 +9,17 @@ import {
   StyleSheet,
   Platform,
   PlatformColor,
-  Alert
+  Alert,
+  ActivityIndicator
 } from "react-native";
 import * as FileSystem from "expo-file-system";
 import * as MailComposer from "expo-mail-composer";
 import * as Sharing from "expo-sharing";
+import { useState } from "react";
 
 export default function Settings() {
+  const [isExporting, setIsExporting] = useState(false);
+
   function onDeleteAll() {
     Alert.alert(
       "Are you sure?",
@@ -37,6 +41,7 @@ export default function Settings() {
   }
 
   async function onExport() {
+    setIsExporting(true);
     const logs = await getAllLogs();
     const logsPath = FileSystem.cacheDirectory + "logs.json";
     await FileSystem.writeAsStringAsync(logsPath, JSON.stringify(logs));
@@ -50,33 +55,47 @@ export default function Settings() {
       body: "Attached are all your logs in JSON form.",
       subject: "LogBook logs"
     });
-    if (result.status != MailComposer.MailComposerStatus.SENT) {
+    if (result.status == MailComposer.MailComposerStatus.UNDETERMINED) {
       alert("Something went wrong. The email could not be sent.");
     }
+    setIsExporting(false);
   }
 
   const debugView = (
     <View style={styles.linkContainer}>
       <Link href="/settings/debug">
-        <Text style={{ ...styles.linkText, ...styles.infoText }}>Debug</Text>
+        <Text style={styles.linkText}>Debug</Text>
       </Link>
     </View>
+  );
+
+  const exportView = (
+    <Pressable onPress={onExport}>
+      <Text style={styles.linkText}>Export all logs</Text>
+    </Pressable>
+  );
+
+  const disabledExportView = (
+    <Pressable
+      style={{
+        flexDirection: "row"
+      }}
+      onPress={onExport}
+      disabled={true}
+    >
+      <Text style={styles.infoText}>Exporting... </Text>
+      <ActivityIndicator size="small" color={styles.infoText.color} />
+    </Pressable>
   );
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.linkContainer}>
-        <Pressable onPress={onExport}>
-          <Text style={{ ...styles.linkText, ...styles.infoText }}>
-            Export all logs
-          </Text>
-        </Pressable>
+        {isExporting ? disabledExportView : exportView}
       </View>
       <View style={styles.linkContainer}>
         <Pressable onPress={onDeleteAll}>
-          <Text style={{ ...styles.linkText, ...styles.dangerText }}>
-            Delete all data
-          </Text>
+          <Text style={styles.dangerText}>Delete all data</Text>
         </Pressable>
       </View>
       {process.env.EXPO_PUBLIC_ENV === "dev" ? debugView : <></>}
@@ -95,10 +114,17 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     marginVertical: 10
   },
-  linkText: {
-    // fontSize: 18
-  },
   infoText: {
+    ...Platform.select({
+      ios: {
+        color: PlatformColor("secondaryLabel")
+      },
+      default: {
+        color: "lightgray"
+      }
+    })
+  },
+  linkText: {
     ...Platform.select({
       ios: {
         color: PlatformColor("link")

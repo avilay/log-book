@@ -101,7 +101,7 @@ export async function getAllLogs() {
     logs.notes as notes
   FROM logs, activities
   WHERE logs.activity_id = activities.activity_id
-  ORDER BY log.timestamp
+  ORDER BY logs.timestamp
   `;
   const rows = await db.getAllAsync<SqlLog>(sql);
   const logs = rows.map((row) => {

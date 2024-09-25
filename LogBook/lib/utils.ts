@@ -127,10 +127,7 @@ export async function simulateDelay() {
     process.env.EXPO_PUBLIC_ENV === "dev" &&
     process.env.EXPO_PUBLIC_SIM_DELAY === "true"
   ) {
-    console.debug(`Value of ENV = ${process.env.EXPO_PUBLIC_ENV}`);
-    console.debug(`Value of SIM_DELAY = ${process.env.EXPO_PUBLIC_SIM_DELAY}`);
     const sleepSecs = getRandom(2, 5);
-    console.debug(`Simulating delay of ${sleepSecs} seconds.`);
     const promise = new Promise<void>((resolve) => {
       setTimeout(() => resolve(), sleepSecs * 1000);
     });

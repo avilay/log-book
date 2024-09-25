@@ -98,10 +98,6 @@ export async function generateTestData(dbName: string) {
   // Persist generated data in sql
   const db = SQLite.openDatabaseSync(dbName);
 
-  // clean up old data from db
-  db.runSync("DELETE FROM logs");
-  db.runSync("DELETE FROM activities");
-
   // Store all activities to db
   const insertActivity = db.prepareSync(
     "INSERT INTO activities (activity_id, name) VALUES ($activityId, $name)"

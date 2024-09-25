@@ -81,16 +81,8 @@ export async function setupDb(dbName: string) {
 
 export function deleteAllData() {
   const db = SQLite.openDatabaseSync(getDbName());
-
-  const delLogs = `
-  DELETE FROM logs
-  `;
-  db.runSync(delLogs);
-
-  const delActivities = `
-  DELETE FROM activities
-  `;
-  db.runSync(delActivities);
+  db.runSync("DELETE FROM logs");
+  db.runSync("DELETE FROM activities");
 }
 
 export function getDbName() {
@@ -111,18 +103,22 @@ export function getDbName() {
 export function initializeApp() {
   const dbName = getDbName();
   setupDb(dbName);
-  deleteAllData();
 
   if (process.env.EXPO_PUBLIC_ENV === "dev") {
     console.info("Running in dev environment.");
 
     if (process.env.EXPO_PUBLIC_GEN_DATA === "true") {
-      console.info("Generating test data.");
+      console.info("Generating new test data.");
+      deleteAllData();
       generateTestData(dbName);
     }
 
-    console.info("Clearing all of async storage.");
-    AsyncStorage.clear();
+    console.info("Removing tutorial keys from async storage.");
+    AsyncStorage.multiRemove([
+      "is_activity_tut1_shown",
+      "is_activity_tut2_shown",
+      "is_log_tut_shown"
+    ]);
   }
 }
 

@@ -18,6 +18,7 @@ import { Log, deleteLog, getLog } from "@/lib/model/log";
 import Spinner from "@/components/Spinner";
 import { formatDate, formatTime } from "@/lib/utils";
 import HeaderNavText from "@/components/HeaderNavText";
+import DisabledHeaderNavText from "@/components/DisabledHeaderNavText";
 import { styles as headerNavTextStyles } from "@/components/HeaderNavText";
 import Item from "@/components/Item";
 
@@ -62,6 +63,8 @@ export default function LogsShow() {
   );
 
   let content = <></>;
+  let edit = <></>;
+
   if (!log) {
     content = <Spinner />;
   } else {
@@ -82,6 +85,16 @@ export default function LogsShow() {
         </Item>
       </View>
     );
+
+    if (!log.activity.isDeleted) {
+      edit = (
+        <Link href={`/logs/edit?logId=${logId}`}>
+          <HeaderNavText>Edit</HeaderNavText>
+        </Link>
+      );
+    } else {
+      edit = <DisabledHeaderNavText>Edit</DisabledHeaderNavText>;
+    }
   }
 
   return (
@@ -93,13 +106,7 @@ export default function LogsShow() {
             fontSize: headerNavTextStyles.headerLink.fontSize
           },
           headerRight: () => {
-            return (
-              <View>
-                <Link href={`/logs/edit?logId=${logId}`}>
-                  <HeaderNavText>Edit</HeaderNavText>
-                </Link>
-              </View>
-            );
+            return <View>{edit}</View>;
           }
         }}
       />

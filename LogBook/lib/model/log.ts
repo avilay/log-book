@@ -16,6 +16,7 @@ type SqlLog = {
   timestamp: number;
   activity_id: string;
   activity_name: string;
+  activity_is_deleted: number;
   notes: string;
 };
 
@@ -33,6 +34,9 @@ export async function deleteLog(logId: string) {
 }
 
 export async function addLog(log: Log) {
+  if (log.activity.isDeleted) {
+    throw Error("Unable to log a deleted activity!");
+  }
   await simulateDelay();
   const sql = `
   INSERT INTO logs (log_id, timestamp, notes, activity_id)
@@ -47,6 +51,9 @@ export async function addLog(log: Log) {
 }
 
 export async function editLog(log: Log) {
+  if (log.activity.isDeleted) {
+    throw Error("Unable to edit log for deleted activity!");
+  }
   await simulateDelay();
   const sql = `
   UPDATE logs SET timestamp = $timestamp, notes = $notes, activity_id = $activityId
@@ -68,6 +75,7 @@ export async function getLog(logId: string) {
     logs.timestamp as timestamp,
     logs.activity_id as activity_id,
     activities.name as activity_name,
+    activities.is_deleted as activity_is_deleted,
     logs.notes as notes
   FROM logs, activities
   WHERE logs.activity_id = activities.activity_id
@@ -80,7 +88,8 @@ export async function getLog(logId: string) {
       date: new Date(row.timestamp),
       activity: {
         activityId: row.activity_id,
-        name: row.activity_name
+        name: row.activity_name,
+        isDeleted: Boolean(row.activity_is_deleted)
       },
       notes: row.notes
     };
@@ -98,6 +107,7 @@ export async function getAllLogs() {
     logs.timestamp as timestamp,
     logs.activity_id as activity_id,
     activities.name as activity_name,
+    activities.is_deleted as activity_is_deleted,
     logs.notes as notes
   FROM logs, activities
   WHERE logs.activity_id = activities.activity_id
@@ -110,7 +120,8 @@ export async function getAllLogs() {
       date: new Date(row.timestamp),
       activity: {
         activityId: row.activity_id,
-        name: row.activity_name
+        name: row.activity_name,
+        isDeleted: Boolean(row.activity_is_deleted)
       },
       notes: row.notes
     };
@@ -127,6 +138,7 @@ export async function getLogsGroupedByDay() {
     logs.timestamp as timestamp,
     logs.activity_id as activity_id,
     activities.name as activity_name,
+    activities.is_deleted as activity_is_deleted,
     logs.notes as notes
   FROM logs, activities
   WHERE logs.activity_id = activities.activity_id
@@ -138,7 +150,8 @@ export async function getLogsGroupedByDay() {
       date: new Date(row.timestamp),
       activity: {
         activityId: row.activity_id,
-        name: row.activity_name
+        name: row.activity_name,
+        isDeleted: Boolean(row.activity_is_deleted)
       },
       notes: row.notes
     };

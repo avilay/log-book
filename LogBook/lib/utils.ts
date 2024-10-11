@@ -61,13 +61,21 @@ export function formatTime(date: Date) {
   return isAM ? `${hrsStr}:${minsStr} AM` : `${hrsStr}:${minsStr} PM`;
 }
 
-export async function setupDb(dbName: string) {
-  const db = await SQLite.openDatabaseAsync(dbName);
-  await db.execAsync(`
+function setupDb(dbName: string, dropTables: boolean) {
+  const db = SQLite.openDatabaseSync(dbName);
+  if (dropTables) {
+    console.info("Dropping existing tables.");
+    db.runSync("DROP TABLE logs");
+    db.runSync("DROP TABLE activities");
+  }
+
+  console.info("Creating db schema.");
+  db.execSync(`
   PRAGMA journal_mode = WAL;
   CREATE TABLE IF NOT EXISTS activities (
     activity_id TEXT PRIMARY KEY,
-    name TEXT
+    name TEXT,
+    is_deleted INTEGER DEFAULT 0
   );
   CREATE TABLE IF NOT EXISTS logs (
     log_id TEXT PRIMARY KEY,
@@ -79,7 +87,8 @@ export async function setupDb(dbName: string) {
   `);
 }
 
-export function deleteAllData() {
+function deleteAllData() {
+  console.info("Deleting all old data.");
   const db = SQLite.openDatabaseSync(getDbName());
   db.runSync("DELETE FROM logs");
   db.runSync("DELETE FROM activities");
@@ -102,7 +111,6 @@ export function getDbName() {
 
 export function initializeApp() {
   const dbName = getDbName();
-  setupDb(dbName);
 
   if (process.env.EXPO_PUBLIC_ENV === "dev") {
     console.info("Running in dev environment.");
@@ -110,6 +118,7 @@ export function initializeApp() {
     if (process.env.EXPO_PUBLIC_GEN_DATA === "true") {
       console.info("Generating new test data.");
       deleteAllData();
+      setupDb(dbName, true);
       generateTestData(dbName);
     }
 
@@ -119,6 +128,8 @@ export function initializeApp() {
       "is_activity_tut2_shown",
       "is_log_tut_shown"
     ]);
+  } else {
+    setupDb(dbName, false);
   }
 }
 

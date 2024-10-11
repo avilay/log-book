@@ -6,27 +6,33 @@ import * as SQLite from "expo-sqlite";
 const ACTIVITIES = [
   {
     activityId: "1",
-    name: "Run"
+    name: "Run",
+    isDeleted: false
   },
   {
     activityId: "2",
-    name: "Take Medication"
+    name: "Take Medication",
+    isDeleted: false
   },
   {
     activityId: "3",
-    name: "Gym"
+    name: "Gym",
+    isDeleted: false
   },
   {
     activityId: "4",
-    name: "Meditate"
+    name: "Meditate",
+    isDeleted: false
   },
   {
     activityId: "5",
-    name: "Dishes"
+    name: "Dishes",
+    isDeleted: true
   },
   {
     activityId: "6",
-    name: "Gratitude"
+    name: "Gratitude",
+    isDeleted: false
   }
 ];
 
@@ -82,6 +88,7 @@ export function generateLogs(
 }
 
 export async function generateTestData(dbName: string) {
+  console.info("Generating test data.");
   const millisInDay = 24 * 60 * 60 * 1000;
   const numDays = getRandom(3, 10);
 
@@ -100,13 +107,14 @@ export async function generateTestData(dbName: string) {
 
   // Store all activities to db
   const insertActivity = db.prepareSync(
-    "INSERT INTO activities (activity_id, name) VALUES ($activityId, $name)"
+    "INSERT INTO activities (activity_id, name, is_deleted) VALUES ($activityId, $name, $isDeleted)"
   );
   ACTIVITIES.forEach((activity) => {
     try {
       insertActivity.executeSync({
         $activityId: activity.activityId,
-        $name: activity.name
+        $name: activity.name,
+        $isDeleted: activity.isDeleted
       });
     } catch (err) {
       console.debug("Unable to add activity -");

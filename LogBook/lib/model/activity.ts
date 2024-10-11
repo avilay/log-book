@@ -6,12 +6,13 @@ const db = SQLite.openDatabaseSync(getDbName());
 export type Activity = {
   activityId: string;
   name: string;
+  isDeleted: boolean;
 };
 
 export async function deleteActivity(activityId: string) {
   await simulateDelay();
   const sql = `
-  DELETE FROM activities WHERE activity_id = $activityId
+  UPDATE activities SET is_deleted = 1 WHERE activity_id = $activityId
   `;
   await db.runAsync(sql, { $activityId: activityId });
 }
@@ -28,6 +29,9 @@ export async function addActivity(activity: Activity) {
 }
 
 export async function editActivity(activity: Activity) {
+  if (activity.isDeleted) {
+    throw Error("Unable to edit deleted activity!");
+  }
   await simulateDelay();
   const sql = `
   UPDATE activities SET name = $name WHERE activity_id = $activityId
@@ -41,17 +45,19 @@ export async function editActivity(activity: Activity) {
 export async function getActivity(activityId: string) {
   await simulateDelay();
   const sql = `
-  SELECT activity_id, name FROM activities
+  SELECT activity_id, name, is_deleted FROM activities
   WHERE activity_id = $activityId
   `;
-  const row = await db.getFirstAsync<{ activity_id: string; name: string }>(
-    sql,
-    { $activityId: activityId }
-  );
+  const row = await db.getFirstAsync<{
+    activity_id: string;
+    name: string;
+    is_deleted: number;
+  }>(sql, { $activityId: activityId });
   if (row) {
     const activity = {
       activityId: row.activity_id,
-      name: row.name
+      name: row.name,
+      isDeleted: Boolean(row.is_deleted)
     };
     return activity;
   } else {
@@ -62,13 +68,18 @@ export async function getActivity(activityId: string) {
 export async function getActivities() {
   await simulateDelay();
   const sql = `
-  SELECT activity_id, name FROM activities
+  SELECT activity_id, name, is_deleted FROM activities
   `;
-  const rows = await db.getAllAsync<{ activity_id: string; name: string }>(sql);
+  const rows = await db.getAllAsync<{
+    activity_id: string;
+    name: string;
+    is_deleted: number;
+  }>(sql);
   const activities = rows.map((row) => {
     return {
       activityId: row.activity_id,
-      name: row.name
+      name: row.name,
+      isDeleted: Boolean(row.is_deleted)
     };
   });
   return activities;

@@ -85,6 +85,7 @@ function setupDb(dbName: string, dropTables: boolean) {
     FOREIGN KEY(activity_id) REFERENCES activities(activity_id)
   );
   `);
+  db.execSync(`ALTER TABLE activities ADD COLUMN is_deleted INTEGER DEFAULT 0`);
 }
 
 function deleteAllData() {

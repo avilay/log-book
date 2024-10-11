@@ -66,6 +66,7 @@ export default function LogsIndex() {
           setSectionedLogs(slogs);
           if (slogs.length == 0 && !isTutShown) {
             setShowTutorial(true);
+            AsyncStorage.setItem("is_log_tut_shown", "true");
           }
         }
       }

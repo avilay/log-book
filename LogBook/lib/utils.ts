@@ -112,28 +112,28 @@ export function getDbName() {
 export function initializeApp() {
   const dbName = getDbName();
 
-  if (process.env.EXPO_PUBLIC_ENV === "dev") {
-    console.info("Running in dev environment. APTG");
+  // All DATA_ env variables are only considered for dev environment
+  if (process.env.EXPO_PUBLIC_DATA_RESET_SCHEMA === "true") {
+    setupDb(dbName, true);
+  } else {
+    setupDb(dbName, false);
+  }
 
-    // All DATA_ env variables are only considered for dev environment
-    if (process.env.EXPO_PUBLIC_DATA_RESET_SCHEMA === "true") {
-      setupDb(dbName, true);
-    }
-    if (process.env.EXPO_PUBLIC_DATA_DELETE === "true") {
-      deleteAllData();
-    }
-    if (process.env.EXPO_PUBLIC_DATA_GEN === "true") {
-      generateTestData(dbName);
-    }
+  if (process.env.EXPO_PUBLIC_DATA_DELETE === "true") {
+    deleteAllData();
+  }
 
+  if (process.env.EXPO_PUBLIC_DATA_GEN === "true") {
+    generateTestData(dbName);
+  }
+
+  if (process.env.EXPO_PUBLIC_RESET_TUTORIAL === "true") {
     console.info("Removing tutorial keys from async storage.");
     AsyncStorage.multiRemove([
       "is_activity_tut1_shown",
       "is_activity_tut2_shown",
       "is_log_tut_shown"
     ]);
-  } else {
-    setupDb(dbName, false);
   }
 }
 

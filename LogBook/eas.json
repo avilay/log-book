@@ -9,16 +9,21 @@
       "distribution": "internal",
       "env": {
       	"EXPO_PUBLIC_ENV": "dev",
-      	"EXPO_PUBLIC_SIM_DELAY": "false",
-        "EXPO_PUBLIC_GEN_DATA": "true"
+        "EXPO_PUBLIC_SIM_DELAY": "false",
+        "EXPO_PUBLIC_DATA_RESET_SCHEMA": "false",
+        "EXPO_PUBLIC_DATA_DELETE": "true",
+        "EXPO_PUBLIC_DATA_GEN": "true"
+
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
       	"EXPO_PUBLIC_ENV": "prod",
-      	"EXPO_PUBLIC_SIM_DELAY": "false",
-        "EXPO_PUBLIC_GEN_DATA": "false"
+        "EXPO_PUBLIC_SIM_DELAY": "false",
+        "EXPO_PUBLIC_DATA_RESET_SCHEMA": "false",
+        "EXPO_PUBLIC_DATA_DELETE": "false",
+        "EXPO_PUBLIC_DATA_GEN": "false"
       }
     }
   },

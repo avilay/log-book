@@ -64,12 +64,12 @@ export function formatTime(date: Date) {
 function setupDb(dbName: string, dropTables: boolean) {
   const db = SQLite.openDatabaseSync(dbName);
   if (dropTables) {
-    console.info("Dropping existing tables.");
+    console.info("Dropping old tables.");
     db.runSync("DROP TABLE logs");
     db.runSync("DROP TABLE activities");
   }
 
-  console.info("Creating db schema.");
+  console.info("Creating db schema if needed.");
   db.execSync(`
   PRAGMA journal_mode = WAL;
   CREATE TABLE IF NOT EXISTS activities (
@@ -85,10 +85,9 @@ function setupDb(dbName: string, dropTables: boolean) {
     FOREIGN KEY(activity_id) REFERENCES activities(activity_id)
   );
   `);
-  db.execSync(`ALTER TABLE activities ADD COLUMN is_deleted INTEGER DEFAULT 0`);
 }
 
-function deleteAllData() {
+export function deleteAllData() {
   console.info("Deleting all old data.");
   const db = SQLite.openDatabaseSync(getDbName());
   db.runSync("DELETE FROM logs");
@@ -114,12 +113,16 @@ export function initializeApp() {
   const dbName = getDbName();
 
   if (process.env.EXPO_PUBLIC_ENV === "dev") {
-    console.info("Running in dev environment.");
+    console.info("Running in dev environment. APTG");
 
-    if (process.env.EXPO_PUBLIC_GEN_DATA === "true") {
-      console.info("Generating new test data.");
-      deleteAllData();
+    // All DATA_ env variables are only considered for dev environment
+    if (process.env.EXPO_PUBLIC_DATA_RESET_SCHEMA === "true") {
       setupDb(dbName, true);
+    }
+    if (process.env.EXPO_PUBLIC_DATA_DELETE === "true") {
+      deleteAllData();
+    }
+    if (process.env.EXPO_PUBLIC_DATA_GEN === "true") {
       generateTestData(dbName);
     }
 

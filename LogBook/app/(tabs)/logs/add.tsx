@@ -16,19 +16,23 @@ export default function AddLog() {
     date: new Date(),
     activity: {
       activityId: "",
-      name: ""
+      name: "",
+      isDeleted: false
     },
     notes: ""
   });
   const [activities, setActivities] = useState<Activity[]>([]);
-  const allActivities = new Map();
+  const activityIdx = new Map();
 
   useFocusEffect(
     useCallback(() => {
       let ignore = false;
 
       async function _getActivities() {
-        const _activities = await getActivities();
+        const _allActivities = await getActivities();
+        const _activities = _allActivities.filter(
+          (activity) => !activity.isDeleted
+        );
         if (!ignore) {
           setActivities(_activities);
         }
@@ -42,7 +46,7 @@ export default function AddLog() {
   );
 
   activities.forEach((activity) => {
-    allActivities.set(activity.activityId, activity);
+    activityIdx.set(activity.activityId, activity);
   });
 
   async function onAdd() {
@@ -97,7 +101,7 @@ export default function AddLog() {
             data={activities}
             labelField="name"
             valueField="activityId"
-            value={allActivities.get(log.activity.activityId)}
+            value={activityIdx.get(log.activity.activityId)}
             onChange={(item) => {
               const addedLog = {
                 logId: log.logId,

@@ -48,11 +48,6 @@ export default function ActivityIndex() {
           (activity) => !activity.isDeleted
         );
 
-        console.debug("All activities -");
-        allActivities.forEach((activity) => console.debug(activity));
-        console.debug("Filtered activities -");
-        _activities.forEach((activity) => console.debug(activity));
-
         const _numLogs = await countLogs();
         const isTut1Shown = await AsyncStorage.getItem(
           "is_activity_tut1_shown"

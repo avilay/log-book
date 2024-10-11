@@ -88,7 +88,7 @@ export function generateLogs(
 }
 
 export async function generateTestData(dbName: string) {
-  console.info("Generating test data.");
+  console.info("Generating new test data.");
   const millisInDay = 24 * 60 * 60 * 1000;
   const numDays = getRandom(3, 10);
 

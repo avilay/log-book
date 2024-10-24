@@ -11,17 +11,13 @@ export type Activity = {
 
 export async function deleteActivity(activityId: string) {
   await simulateDelay();
-  const sql = `
-  UPDATE activities SET is_deleted = 1 WHERE activity_id = $activityId
-  `;
+  const sql = `UPDATE activities SET is_deleted = 1 WHERE activity_id = $activityId`;
   await db.runAsync(sql, { $activityId: activityId });
 }
 
 export async function addActivity(activity: Activity) {
   await simulateDelay();
-  const sql = `
-  INSERT INTO activities (activity_id, name) VALUES ($activityId, $name)
-  `;
+  const sql = `INSERT INTO activities (activity_id, name) VALUES ($activityId, $name)`;
   await db.runAsync(sql, {
     $activityId: activity.activityId,
     $name: activity.name
@@ -33,9 +29,7 @@ export async function editActivity(activity: Activity) {
     throw Error("Unable to edit deleted activity!");
   }
   await simulateDelay();
-  const sql = `
-  UPDATE activities SET name = $name WHERE activity_id = $activityId
-  `;
+  const sql = `UPDATE activities SET name = $name WHERE activity_id = $activityId`;
   await db.runAsync(sql, {
     $activityId: activity.activityId,
     $name: activity.name
@@ -67,9 +61,7 @@ export async function getActivity(activityId: string) {
 
 export async function getActivities() {
   await simulateDelay();
-  const sql = `
-  SELECT activity_id, name, is_deleted FROM activities
-  `;
+  const sql = `SELECT activity_id, name, is_deleted FROM activities`;
   const rows = await db.getAllAsync<{
     activity_id: string;
     name: string;
@@ -87,9 +79,7 @@ export async function getActivities() {
 
 export async function countActivities() {
   await simulateDelay();
-  const sql = `
-  SELECT COUNT(*) as activities_count FROM activities
-  `;
+  const sql = `SELECT COUNT(*) as activities_count FROM activities`;
   const row = await db.getFirstAsync<{ activities_count: number }>(sql);
   return row ? row.activities_count : 0;
 }

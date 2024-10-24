@@ -112,7 +112,6 @@ export function getDbName() {
 export function initializeApp() {
   const dbName = getDbName();
 
-  // All DATA_ env variables are only considered for dev environment
   if (process.env.EXPO_PUBLIC_DATA_RESET_SCHEMA === "true") {
     setupDb(dbName, true);
   } else {
@@ -138,10 +137,7 @@ export function initializeApp() {
 }
 
 export async function simulateDelay() {
-  if (
-    process.env.EXPO_PUBLIC_ENV === "dev" &&
-    process.env.EXPO_PUBLIC_SIM_DELAY === "true"
-  ) {
+  if (process.env.EXPO_PUBLIC_SIM_DELAY === "true") {
     const sleepSecs = getRandom(2, 5);
     const promise = new Promise<void>((resolve) => {
       setTimeout(() => resolve(), sleepSecs * 1000);

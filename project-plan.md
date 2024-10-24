@@ -18,44 +18,51 @@ In no particular order -
 
 * [ ] ~~Wire up `getLogDetails` to `ShowLog`.~~
 
-* [ ] Iteratively design/build the `AddLog` page with an Expo Router Modal component.
+* [x] Iteratively design/build the `AddLog` page with an Expo Router Modal component.
 
-* [ ] Implement an async `addLog` function.
+* [x] Implement an async `addLog` function.
 
-* [ ] Wire up `addLog` with `add_log`. 
+* [x] Wire up `addLog` with `add_log`. 
 
-* [ ] Iteratively design/build the `EditLog` page. It should have a `Delete` button.
+* [x] Iteratively design/build the `EditLog` page. It should have a `Delete` button.
 
-* [ ] Implement async `updateLog` and `deleteLog` functions.
+* [x] Implement async `updateLog` and `deleteLog` functions.
 
-* [ ] Wire up `updateLog` and `deleteLog` with `EditLog`.
+* [x] Wire up `updateLog` and `deleteLog` with `EditLog`.
 
-* [ ] Iteratively design/build the `activities` page. Get the first draft of the `Activity` entity design. This page should have both the `Add` and `Edit` buttons.
+* [x] Iteratively design/build the `activities` page. Get the first draft of the `Activity` entity design. This page should have both the `Add` and `Edit` buttons.
 
-* [ ] Implement an async `getActivities` function.
+* [x] Implement an async `getActivities` function.
 
-* [ ] Wire up `getActivities` with `activities`.
+* [x] Wire up `getActivities` with `activities`.
 
-* [ ] Iteratively design/build in-place editing activity functionality. It should only involve rewording it or deleting it.
+* [x] Iteratively design/build in-place editing activity functionality. It should only involve rewording it or deleting it.
 
-* [ ] Implement an async `updateActivity` function.
+* [x] Implement an async `updateActivity` function.
 
-* [ ] Implement an async `deleteActivity` function.
+* [x] Implement an async `deleteActivity` function.
 
-* [ ] Wire up `updateActivity` and `deleteActivity` with edit functionality.
+* [x] Wire up `updateActivity` and `deleteActivity` with edit functionality.
 
-* [ ] Iteratively design/build adding activity functionality using Modals.
+* [x] Iteratively design/build adding activity functionality using Modals.
 
-* [ ] Implement an async `addActivity` function.
+* [x] Implement an async `addActivity` function.
 
-* [ ] Wire up `addActivity` with add activity page.
+* [x] Wire up `addActivity` with add activity page.
 
-* [ ] Integrate Supabase auth. 
+* [ ] ~~Integrate Supabase auth.~~
 
-* [ ] Implement `Auth` component.
+* [ ] ~~Implement `Auth` component.~~
 
-* [ ] Design and build a welcome/public page for unauthenticated users.
+* [ ] ~~Design and build a welcome/public page for unauthenticated users.~~
 
-  
+* [ ] Implement import log functionality. This will help me move from test flight to prod version of the app.
 
-  
+## Release TODOs
+
+* [ ] Get screenshots from larger phone displays.
+* [ ] Design a logo.
+* [ ] Integrate logo.
+* [ ] Set up support and marketing website.
+* [ ] Fill out all the forms on the apple dev connect.
+

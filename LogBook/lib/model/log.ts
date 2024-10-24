@@ -27,9 +27,7 @@ export type GroupedLogs = {
 
 export async function deleteLog(logId: string) {
   await simulateDelay();
-  const sql = `
-  DELETE FROM logs WHERE log_id = $logId
-  `;
+  const sql = `DELETE FROM logs WHERE log_id = $logId`;
   await db.runAsync(sql, { $logId: logId });
 }
 
@@ -209,9 +207,7 @@ export async function getLogsGroupedByDay() {
 
 export async function countLogs() {
   await simulateDelay();
-  const sql = `
-  SELECT COUNT(*) as logs_count FROM logs
-  `;
+  const sql = `SELECT COUNT(*) as logs_count FROM logs`;
   const row = await db.getFirstAsync<{ logs_count: number }>(sql);
   return row ? row.logs_count : 0;
 }

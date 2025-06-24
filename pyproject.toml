@@ -1,0 +1,10 @@
+[project]
+name = "log-book"
+version = "0.1.0"
+description = "App to log daily activities."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi[standard]>=0.115.13",
+    "shortuuid>=1.0.13",
+]

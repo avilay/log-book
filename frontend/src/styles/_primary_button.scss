@@ -1,0 +1,10 @@
+@use "vars";
+
+.button.primary {
+  background-color: vars.$primary-color;
+  color: vars.$light-color;
+}
+
+.button.primary:hover, .button.primary:focus {
+  background-color: vars.$darker-primary-color;
+}

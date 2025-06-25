@@ -1,0 +1,16 @@
+@use "vars";
+
+.top-bar {
+  margin-top: 1.5em;
+  display: flex;
+  flex-flow: row nowrap;
+
+  h1 {
+    color: vars.$primary-color;
+    margin: 0;
+  }
+}
+
+.content {
+  margin-top: 1em;
+}

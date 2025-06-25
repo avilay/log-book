@@ -1,38 +1,24 @@
 import logging
-from datetime import date, datetime
+from datetime import datetime
 from itertools import groupby
-from typing import Any, Sequence
+from typing import Sequence
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, model_serializer
+from pydantic import BaseModel, field_serializer
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from backend.log import Log, LogService
 
 
 class GroupedLogs(BaseModel):
-    datestamp: date
+    datestamp: datetime
     logs: list[Log]
 
-    @model_serializer
-    def ser(self) -> dict[str, Any]:
-        if self.datestamp.year == datetime.now().year:
-            ds = self.datestamp.strftime("%a, %b %d")
-        else:
-            ds = self.datestamp.strftime("%a, %b %d, %Y")
-        return {
-            "datestamp": ds,
-            "logs": [
-                {
-                    "logId": log.log_id,
-                    "timestamp": log.timestamp.strftime("%I:%M %p"),
-                    "activity": log.activity,
-                }
-                for log in self.logs
-            ],
-        }
+    @field_serializer("datestamp")
+    def serialize_datestamp(self, datestamp: datetime, _info) -> str:
+        return datestamp.isoformat(timespec="minutes")
 
 
 app = FastAPI()
@@ -61,7 +47,11 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         try:
             body = await request.body()
 
-            if request.method == "POST" or request.method == "PUT":
+            if (
+                request.method == "POST"
+                or request.method == "PUT"
+                or request.method == "DELETE"
+            ):
                 logger.info(
                     f"Incoming request: {request.method} {request.url} Payload: {body.decode('utf-8')}"
                 )
@@ -83,9 +73,13 @@ app.add_middleware(LoggingMiddleware)
 @app.get("/logs")
 async def logs(grouped=False) -> Sequence[Log] | Sequence[GroupedLogs]:
     all_logs = sorted(log_svc.logs(), key=lambda log: log.timestamp, reverse=True)
+    tz = all_logs[0].timestamp.tzinfo
     if grouped:
         grouped_logs = [
-            GroupedLogs(datestamp=ds, logs=list(glogs))
+            GroupedLogs(
+                datestamp=datetime(year=ds.year, month=ds.month, day=ds.day, tzinfo=tz),
+                logs=list(glogs),
+            )
             for ds, glogs in groupby(all_logs, key=lambda log: log.timestamp.date())
         ]
         return grouped_logs
@@ -95,3 +89,18 @@ async def logs(grouped=False) -> Sequence[Log] | Sequence[GroupedLogs]:
 @app.post("/logs")
 async def new_log(log: Log) -> Log:
     return log_svc.new_log(log)
+
+
+@app.delete("/logs/{log_id}")
+async def delete_log(log_id: str) -> None:
+    log_svc.delete_log(log_id)
+    return
+
+
+@app.put("/logs")
+async def update_log(log: Log) -> None:
+    try:
+        log_svc.update_log(log)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return

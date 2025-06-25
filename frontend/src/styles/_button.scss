@@ -1,0 +1,22 @@
+@use "vars";
+
+// Button styling
+.button {
+  display: inline-block;
+  padding: 0.5em 1.25em;
+  text-align: center;
+  border-radius: 7px;
+
+  /* This is needed for <a> */
+  text-decoration: none;
+
+  /* These two are needed for <button>*/
+  border: 0;
+  cursor: pointer;
+}
+
+
+
+
+
+

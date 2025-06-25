@@ -1,0 +1,10 @@
+@use "vars";
+
+.button.understated {
+  background-color: vars.$understated-color;
+  color: vars.$dark-color;
+}
+
+.button.understated:hover, .button.understated:focus {
+  background-color: vars.$darker-understated-color;
+}

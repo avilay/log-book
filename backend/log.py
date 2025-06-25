@@ -2,6 +2,7 @@ import random
 from datetime import datetime, timedelta
 from typing import Sequence
 
+import pytz
 import shortuuid
 from pydantic import BaseModel, ConfigDict, field_serializer
 from pydantic.alias_generators import to_camel
@@ -27,7 +28,7 @@ class Log(BaseModel):
 class LogService:
     def __init__(self):
         self._logs: dict[str, Log] = {}
-        now = datetime.now()
+        now = datetime.now(pytz.timezone("US/Pacific"))
         activities = [
             "Short",
             "A very long activity name",

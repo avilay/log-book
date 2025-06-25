@@ -1,10 +1,10 @@
 type Log = {
     logId?: string,
-    timestamp: string, 
+    timestamp: Date, 
     activity: string
 }
 
 type GroupedLogs = {
-    datestamp: string,
+    datestamp: Date,
     logs: Log[]
 }

@@ -8,6 +8,7 @@
   <nav>
     <ul>
         <li aria-current={page.url.pathname === '/new-log' ? 'page' : undefined}>
+          <a href="/new-log">
             <svg 
               height="32" 
               id="svg8" 
@@ -55,11 +56,13 @@
                 />
               </g>
             </svg>
-          <br>
-          <a href="/new-log">New Log</a>
+            <br>
+            New Log
+          </a>
         </li>
         <li aria-current={page.url.pathname === '/history' ? 'page' : undefined}>
-          <svg 
+          <a href="/history">
+            <svg 
             id="Layer_1" 
             height="32" 
             width="32" 
@@ -75,12 +78,14 @@
               <path d="M68.8,55.4H30.3c-0.8,0-1.5,0.7-1.5,1.5s0.7,1.5,1.5,1.5h38.5c0.8,0,1.5-0.7,1.5-1.5S69.6,55.4,68.8,55.4z"/>
               <path d="M68.8,66.4H30.3c-0.8,0-1.5,0.7-1.5,1.5c0,0.8,0.7,1.5,1.5,1.5h38.5c0.8,0,1.5-0.7,1.5-1.5C70.3,67.1,69.6,66.4,68.8,66.4z   "/>
             </g>
-          </svg>
-          <br>
-          <a href="/history">History</a>
+            </svg>
+            <br>
+            History
+          </a>
         </li>
         <li aria-current={page.url.pathname === '/insights' ? 'page' : undefined}>
-          <svg 
+          <a href="/insights">
+            <svg 
             id="Layer_1" 
             height="32"
             width="32"
@@ -96,12 +101,14 @@
               <path d="M227.4,94.9c-2.7,0-4.9,2.2-4.9,4.9v138.9h-36.9V128.9c0-2.7-2.2-4.9-4.9-4.9c-2.7,0-4.9,2.2-4.9,4.9v114.7   c0,2.7,2.2,4.9,4.9,4.9h46.7c2.7,0,4.9-2.2,4.9-4.9V99.9C232.3,97.1,230.1,94.9,227.4,94.9z"/>
               <path d="M234.9,12c-0.1-1.8-1.2-3.3-2.7-4.1c-1.6-0.8-3.5-0.7-4.9,0.3L173.5,44c-1.5,1-2.3,2.7-2.2,4.4c0.1,1.8,1.2,3.3,2.7,4.1   L198,64.4C172.5,121,89.5,142.9,22.4,134.6c-2.7-0.4-5.2,1.6-5.5,4.3c-0.3,2.7,1.6,5.2,4.3,5.5c9.9,1.2,20,1.8,30.3,1.8   c64.4,0,131.5-24.6,155.4-77.5L232,81.2c0.7,0.3,1.4,0.5,2.2,0.5c1,0,1.9-0.3,2.7-0.8c1.5-1,2.3-2.7,2.2-4.4L234.9,12z M206.3,57.5   C206.2,57.5,206.2,57.4,206.3,57.5c-0.1-0.1-0.1-0.1-0.1-0.1l-20-9.9l39.5-26.3l3.1,47.4L206.3,57.5z"/>
             </g>
-          </svg>
-          <br>
-          <a href="/insights">Insights</a>
+            </svg>
+            <br>
+            Insights
+          </a>
         </li>
         <li aria-current={page.url.pathname === '/account' ? 'page' : undefined}>
-          <svg 
+          <a href="/account">
+            <svg 
             enable-background="new 0 0 128 128" 
             height="32" 
             version="1.1" 
@@ -113,9 +120,10 @@
             <g id="OBJECT">
               <path d="M88.689,69.672c2.992-4.606,4.738-10.093,4.738-15.983c0-16.226-13.201-29.427-29.426-29.427   c-16.227,0-29.428,13.201-29.428,29.427c0,5.893,1.748,11.383,4.743,15.99c-9.906,7.643-15.794,19.515-15.797,32.06   c0,0.531,0.21,1.04,0.585,1.415c0.375,0.375,0.884,0.586,1.415,0.586h76.963c1.104,0,2-0.896,2-2   C104.482,89.158,98.608,77.321,88.689,69.672z M64.001,28.261c14.02,0,25.426,11.407,25.426,25.427   c0,14.021-11.406,25.428-25.426,25.428c-14.021,0-25.428-11.407-25.428-25.428C38.573,39.668,49.98,28.261,64.001,28.261z    M27.574,99.739c0.586-10.543,5.764-20.384,14.141-26.865c5.401,6.265,13.385,10.242,22.286,10.242   c8.904,0,16.891-3.981,22.291-10.25c8.389,6.488,13.554,16.304,14.135,26.873H27.574z"/>
             </g>
-          </svg>
-          <br>
-          <a href="/account">Account</a>
+            </svg>
+            <br>
+            Account
+          </a>
         </li>
       </ul>
   </nav>
@@ -130,16 +138,10 @@
 </div>
 
 <style lang="scss">
-  $dark-color: #0B1D51;
-  $primary-color: #725CAD;
-  $darker-primary-color: #241d37;
-  $secondary-color: #8CCDEB;
-  $light-color: #FFE3A9;
-  $understated-color: #E1E1E1;
-  $darker-understated-color: #cacaca;
+  @use "../styles/vars";
 
   .container {
-    color: $dark-color;
+    color: vars.$dark-color;
     height: 100%;
 
     display: flex;
@@ -150,7 +152,7 @@
   nav {
     order: 1;
 
-    background-color: $light-color;
+    background-color: vars.$light-color;
     font-size: 0.75rem;
 
     ul {
@@ -166,23 +168,23 @@
 
         a {
           text-decoration: none;
-          color: $primary-color;
+          color: vars.$primary-color;
         }
       }
     }
 
     path, circle {
-      fill: $primary-color;
-      stroke: $primary-color;
+      fill: vars.$primary-color;
+      stroke: vars.$primary-color;
     }
 
     li[aria-current="page"] path, li[aria-current="page"] circle {
-      fill: $darker-primary-color;
-      stroke: $darker-primary-color;
+      fill: vars.$darker-primary-color;
+      stroke: vars.$darker-primary-color;
     }
 
     li[aria-current="page"] a {
-      color: $darker-primary-color;
+      color: vars.$darker-primary-color;
     }
   }
 

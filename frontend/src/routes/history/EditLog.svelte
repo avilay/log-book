@@ -1,57 +1,58 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
   import { PUBLIC_API } from "$env/static/public";
+  import { invalidate, goto } from "$app/navigation";
   import { toDateTimeLocalISOString } from "$lib";
 
-  let uploading = $state(false);
+  let { log }: {log: Log} = $props();
+  let updating = $state(false);
 
-  // let today = new Date();
-  // let year = today.getFullYear();
-  // let month = (today.getMonth() + 1).toString().padStart(2, "0");
-  // let day = (today.getDate()).toString().padStart(2, "0");
-  // let hour = (today.getHours()).toString().padStart(2, "0");
-  // let min = (today.getMinutes()).toString().padStart(2, "0");
-  // let now = `${year}-${month}-${day}T${hour}:${min}`;
-  let now = toDateTimeLocalISOString(new Date());
+  // let timestamp = log["timestamp"];
+  // let year = timestamp.getFullYear();
+  // let month = (timestamp.getMonth() + 1).toString().padStart(2, "0");
+  // let day = (timestamp.getDate()).toString().padStart(2, "0");
+  // let hour = (timestamp.getHours()).toString().padStart(2, "0");
+  // let min = (timestamp.getMinutes()).toString().padStart(2, "0");
+  // let ts = `${year}-${month}-${day}T${hour}:${min}`;
 
-  async function newLog(e: Event) {
+  async function editLog(e: Event) {
     e.preventDefault();
-    uploading = true;
+    updating = true;
     const formData = new FormData(e.target as HTMLFormElement);
-    let log: Log = {
-      timestamp: new Date(Date.parse(formData.get("timestamp") as string)),
-      activity: formData.get("activity") as string
-    }
+    log.timestamp = new Date(Date.parse(formData.get("timestamp") as string));
+    log.activity = formData.get("activity") as string;
     let url = `${PUBLIC_API}/logs`;
     const resp = await fetch(
-      url, 
+      url,
       {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "PUT",
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(log)
       }
     );
-    const addedLog = await resp.json();
-    console.log(addedLog);
+    if (resp.ok) {
+      console.log(`Log ${log.logId} updated.`);
+    } else {
+      console.error(`Unable to update log ${log.logId}!`)
+    }
+    await invalidate(`${PUBLIC_API}/logs?grouped=true`);
     goto("/history");
   }
 </script>
-
 <div class="top-bar">
-  <h1>New Log</h1>
+  <h1>Edit Log</h1>
 </div>
 
 <div class="content">
-  <form class="new-log" onsubmit={newLog}>
-    <input type="datetime-local" name="timestamp" value={now} aria-label="created-at">
-    <input type="text" name="activity" placeholder="Enter activity here" aria-label="activity">
+  <form class="new-log" onsubmit={editLog}>
+    <input type="datetime-local" name="timestamp" value={toDateTimeLocalISOString(log["timestamp"])} aria-label="created-at">
+    <input type="text" name="activity" value={log["activity"]} aria-label="activity">
     <div class="buttons">
-      {#if uploading}
+      {#if updating}
         <button class="button" disabled type="submit">Save</button>
         <button class="button" disabled type="reset">Cancel</button>
       {:else}
         <button class="button primary" type="submit">Save</button>
-        <button class="button understated" type="reset">Cancel</button>
+        <button class="button understated" onclick={() => goto("/history")}>Cancel</button>
       {/if}
     </div>
   </form>

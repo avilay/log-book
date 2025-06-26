@@ -1,11 +1,14 @@
 import logging
 from datetime import datetime
 from itertools import groupby
-from typing import Sequence
+from typing import Annotated, Sequence
 
-from fastapi import FastAPI, HTTPException, Request
+import firebase_admin
+from dotenv import load_dotenv
+from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from firebase_admin import auth
 from pydantic import BaseModel, field_serializer
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -21,14 +24,7 @@ class GroupedLogs(BaseModel):
         return datestamp.isoformat(timespec="minutes")
 
 
-app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # You can restrict this to specific origins
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+load_dotenv()
 
 handlers = [logging.StreamHandler()]
 logformat = "%(asctime)s:%(levelname)s:%(name)s:%(message)s"
@@ -39,7 +35,19 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # You can restrict this to specific origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 log_svc = LogService()
+
+fb_app = firebase_admin.initialize_app()
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):
@@ -87,7 +95,10 @@ async def logs(grouped=False) -> Sequence[Log] | Sequence[GroupedLogs]:
 
 
 @app.post("/logs")
-async def new_log(log: Log) -> Log:
+async def new_log(x_token: Annotated[str | None, Header()], log: Log) -> Log:
+    decoded_token = auth.verify_id_token(x_token)
+    uid = decoded_token["uid"]
+    logger.debug(uid)
     return log_svc.new_log(log)
 
 

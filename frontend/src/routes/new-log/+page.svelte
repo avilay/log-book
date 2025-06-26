@@ -2,17 +2,23 @@
   import { goto } from "$app/navigation";
   import { PUBLIC_API } from "$env/static/public";
   import { toDateTimeLocalISOString } from "$lib";
+	import { onAuthStateChanged } from "firebase/auth";
+	import { auth } from "$lib/firebase-client";
 
   let uploading = $state(false);
-
-  // let today = new Date();
-  // let year = today.getFullYear();
-  // let month = (today.getMonth() + 1).toString().padStart(2, "0");
-  // let day = (today.getDate()).toString().padStart(2, "0");
-  // let hour = (today.getHours()).toString().padStart(2, "0");
-  // let min = (today.getMinutes()).toString().padStart(2, "0");
-  // let now = `${year}-${month}-${day}T${hour}:${min}`;
   let now = toDateTimeLocalISOString(new Date());
+  let token = $state("");
+
+  onAuthStateChanged(auth, async (user) => {
+    console.log("Inside onAuthStateChanged");
+    if (user) {
+      token = await user.getIdToken(false);
+      console.log(token);
+    } else {
+      goto("/");
+    }
+    console.log("Done with onAuthStateChanged");
+  });
 
   async function newLog(e: Event) {
     e.preventDefault();
@@ -27,7 +33,10 @@
       url, 
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "X-Token": token
+        },
         body: JSON.stringify(log)
       }
     );

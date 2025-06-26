@@ -128,7 +128,7 @@
       </ul>
   </nav>
 
-  <main>
+  <main>  
     {#if navigating.to}
       <p>Loading {navigating.to.url.pathname}...</p>
     {:else}

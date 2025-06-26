@@ -15,3 +15,5 @@ wheels/
 node_modules/
 .svelte-kit/
 build/
+
+fb_key.json

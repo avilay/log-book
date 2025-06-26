@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { goto } from "$app/navigation";
-	import { auth } from "$lib/firebase-client";
-	import { redirect } from "@sveltejs/kit";
-	import { GoogleAuthProvider, onAuthStateChanged, signInAnonymously, signInWithPopup } from "firebase/auth";
+  import { goto } from "$app/navigation";
+  import { auth } from "$lib/firebase-client";
+  import { GoogleAuthProvider, onAuthStateChanged, signInAnonymously, signInWithPopup } from "firebase/auth";
   import 'firebaseui/dist/firebaseui.css'
 
 

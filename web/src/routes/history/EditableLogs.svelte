@@ -23,7 +23,7 @@
         <button class="delete" onclick={genDeleteLogAt(gidx, lidx)}>
           <img class="delete-icon" src="/delete.png" alt="delete icon">
         </button>
-        <div>{formatTime(log["timestamp"])}</div>
+        <div>{formatTime(log["createdAtUtc"])}</div>
         <div>{log["activity"]}</div>
         <button class="edit" onclick={genEditLogAt(gidx, lidx)} aria-label="Edit log">
           <svg 

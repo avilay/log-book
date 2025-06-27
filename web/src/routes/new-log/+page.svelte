@@ -10,14 +10,11 @@
   let token = $state("");
 
   onAuthStateChanged(auth, async (user) => {
-    console.log("Inside onAuthStateChanged");
     if (user) {
       token = await user.getIdToken(false);
-      console.log(token);
     } else {
       goto("/");
     }
-    console.log("Done with onAuthStateChanged");
   });
 
   async function newLog(e: Event) {
@@ -25,7 +22,8 @@
     uploading = true;
     const formData = new FormData(e.target as HTMLFormElement);
     let log: Log = {
-      timestamp: new Date(Date.parse(formData.get("timestamp") as string)),
+      // The Date constructor will convert the local datetime to UTC
+      createdAtUtc: new Date(Date.parse(formData.get("createdAtUtc") as string)),
       activity: formData.get("activity") as string
     }
     let url = `${PUBLIC_API}/logs`;
@@ -41,7 +39,6 @@
       }
     );
     const addedLog = await resp.json();
-    console.log(addedLog);
     goto("/history");
   }
 </script>
@@ -52,7 +49,7 @@
 
 <div class="content">
   <form class="new-log" onsubmit={newLog}>
-    <input type="datetime-local" name="timestamp" value={now} aria-label="created-at">
+    <input type="datetime-local" name="createdAtUtc" value={now} aria-label="created-at">
     <input type="text" name="activity" placeholder="Enter activity here" aria-label="activity">
     <div class="buttons">
       {#if uploading}

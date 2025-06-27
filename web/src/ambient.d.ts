@@ -1,6 +1,7 @@
 type Log = {
+    userId?: string,
     logId?: string,
-    timestamp: Date, 
+    createdAtUtc: Date, 
     activity: string
 }
 

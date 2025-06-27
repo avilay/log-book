@@ -3,35 +3,28 @@
   import { invalidate, goto } from "$app/navigation";
   import { toDateTimeLocalISOString } from "$lib";
 
-  let { log }: {log: Log} = $props();
+  let { token, log }: {token: string, log: Log} = $props();
   let updating = $state(false);
-
-  // let timestamp = log["timestamp"];
-  // let year = timestamp.getFullYear();
-  // let month = (timestamp.getMonth() + 1).toString().padStart(2, "0");
-  // let day = (timestamp.getDate()).toString().padStart(2, "0");
-  // let hour = (timestamp.getHours()).toString().padStart(2, "0");
-  // let min = (timestamp.getMinutes()).toString().padStart(2, "0");
-  // let ts = `${year}-${month}-${day}T${hour}:${min}`;
 
   async function editLog(e: Event) {
     e.preventDefault();
     updating = true;
     const formData = new FormData(e.target as HTMLFormElement);
-    log.timestamp = new Date(Date.parse(formData.get("timestamp") as string));
+    log.createdAtUtc = new Date(Date.parse(formData.get("createdAtUtc") as string));
     log.activity = formData.get("activity") as string;
     let url = `${PUBLIC_API}/logs`;
     const resp = await fetch(
       url,
       {
         method: "PUT",
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json",
+          "X-Token": token
+        },
         body: JSON.stringify(log)
       }
     );
-    if (resp.ok) {
-      console.log(`Log ${log.logId} updated.`);
-    } else {
+    if (!resp.ok) {      
       console.error(`Unable to update log ${log.logId}!`)
     }
     await invalidate(`${PUBLIC_API}/logs?grouped=true`);
@@ -44,7 +37,7 @@
 
 <div class="content">
   <form class="new-log" onsubmit={editLog}>
-    <input type="datetime-local" name="timestamp" value={toDateTimeLocalISOString(log["timestamp"])} aria-label="created-at">
+    <input type="datetime-local" name="createdAtUtc" value={toDateTimeLocalISOString(log["createdAtUtc"])} aria-label="created-at">
     <input type="text" name="activity" value={log["activity"]} aria-label="activity">
     <div class="buttons">
       {#if updating}

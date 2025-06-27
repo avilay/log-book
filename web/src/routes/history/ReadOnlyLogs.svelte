@@ -13,7 +13,7 @@
     <h2 class="datestamp">{formatDay(glogs.datestamp)}</h2>
     {#each glogs.logs as log}
       <div class="log">
-        <div>{formatTime(log["timestamp"])}</div>
+        <div>{formatTime(log["createdAtUtc"])}</div>
         <div>{log["activity"]}</div>
       </div>
     {/each}

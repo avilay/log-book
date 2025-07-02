@@ -52,15 +52,15 @@ class LogService:
     def __init__(self, semver: str):
         db = os.environ["DB"].format(semver=semver)
         self.conn = sq3.connect(db)
-        self.conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS logs (
-                log_id CHAR(22) PRIMARY KEY,
-                user_id CHAR(28),
-                created_at_utc TEXT,
-                activity TEXT
-            )"""
-        )
+        # self.conn.execute(
+        #     """
+        #     CREATE TABLE IF NOT EXISTS logs (
+        #         log_id CHAR(22) PRIMARY KEY,
+        #         user_id CHAR(28),
+        #         created_at_utc TEXT,
+        #         activity TEXT
+        #     )"""
+        # )
         self.conn.row_factory = Log.log_factory
 
     def new_log(self, user_id: str, log: Log) -> Log:

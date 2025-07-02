@@ -10,10 +10,9 @@ from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from firebase_admin import auth
+from log_book.log import Log, LogService
 from pydantic import BaseModel, field_serializer
 from starlette.middleware.base import BaseHTTPMiddleware
-
-from api.log import Log, LogService
 
 
 class GroupedLogs(BaseModel):
@@ -44,7 +43,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 log_svc = LogService("1.0.0")
 
@@ -145,3 +143,7 @@ async def gen_demo(x_token: Annotated[str | None, Header()]) -> None:
     uid = token["uid"]
     logger.info(f"Generating demo data for user {uid}")
     log_svc.gen_demo(uid)
+
+
+if __name__ == "__main__":
+    print("hello!")

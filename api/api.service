@@ -1,0 +1,12 @@
+[Unit]
+Description=FastAPI instance to serve api.logbook
+After=network.target
+
+[Service]
+User=root
+Type=simple
+WorkingDirectory=/home/avilay/projects/github/log-book/api/log_book
+ExecStart=/bin/bash -c 'uv sync --frozen --no-cache && /home/avilay/miniconda3/envs/web/bin/uwsgi --ini app-one.ini'
+
+[Install]
+WantedBy=default.target

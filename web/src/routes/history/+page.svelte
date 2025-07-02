@@ -7,7 +7,7 @@
 	import { auth } from "$lib/firebase-client";
 	import { goto } from "$app/navigation";
 
-  let { data }: {data: {logs: GroupedLogs[]}} = $props();
+  console.debug(`PUBLIC_API = ${PUBLIC_API}`);
   let groupedLogs: GroupedLogs[] = $state([]);
   let editable = $state(false);
   let editLog: Log | undefined = $state();

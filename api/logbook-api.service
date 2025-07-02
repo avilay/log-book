@@ -5,8 +5,9 @@ After=network.target
 [Service]
 User=root
 Type=simple
+Environment="PATH=$PATH:/root/projects/log-book/.venv/bin"
 WorkingDirectory=/home/avilay/projects/github/log-book/api/log_book
-ExecStart=/bin/bash -c 'uv sync --frozen --no-cache && /home/avilay/miniconda3/envs/web/bin/uwsgi --ini app-one.ini'
+ExecStart=/root/projects/log-book/.venv/bin/fastapi run app.py
 
 [Install]
 WantedBy=default.target

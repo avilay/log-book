@@ -26,7 +26,8 @@ class GroupedLogs(BaseModel):
 
 load_dotenv()
 
-handlers = [logging.StreamHandler()]
+# handlers = [logging.StreamHandler()]
+handlers = [logging.FileHandler("/var/log/logbook-api/access.log")]
 logformat = "%(asctime)s:%(levelname)s:%(name)s:%(message)s"
 logging.basicConfig(
     format=logformat,
@@ -76,6 +77,10 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 
 
 app.add_middleware(LoggingMiddleware)
+
+@app.get("/version")
+async def version() -> str:
+    return "1.0.0"
 
 
 @app.get("/logs")

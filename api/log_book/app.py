@@ -10,6 +10,7 @@ from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from firebase_admin import auth
+from firebase_admin._auth_utils import InvalidIdTokenError
 from log_book.log import Log, LogService
 from pydantic import BaseModel, field_serializer
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -26,7 +27,6 @@ class GroupedLogs(BaseModel):
 
 load_dotenv()
 
-# handlers = [logging.StreamHandler()]
 handlers = [logging.FileHandler("/var/log/logbook-api/access.log")]
 logformat = "%(asctime)s:%(levelname)s:%(name)s:%(message)s"
 logging.basicConfig(
@@ -68,6 +68,10 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         try:
             response = await call_next(request)
             return response
+        except InvalidIdTokenError as tok_err:
+            logger.error(f"Exception during request: {tok_err}")
+            logger.error(traceback.format_exc())
+            return JSONResponse(status_code=400, content={"detail": "Invalid token!"})
         except Exception as exc:
             logger.error(f"Exception during request: {exc}")
             logger.error(traceback.format_exc())
@@ -78,9 +82,10 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(LoggingMiddleware)
 
+
 @app.get("/version")
 async def version() -> str:
-    return "1.0.0"
+    return "0.0.1"
 
 
 @app.get("/logs")

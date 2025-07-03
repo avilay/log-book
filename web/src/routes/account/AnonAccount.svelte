@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import { auth } from "$lib/firebase-client";
-  import { GoogleAuthProvider, linkWithCredential, linkWithPopup, signInWithPopup, type User } from "firebase/auth";
+  import { GoogleAuthProvider, linkWithPopup, type User } from "firebase/auth";
 
-  let { user, signout, signingOut }: { 
+  let { user, signout, signingOut, appVer }: { 
     user: User, 
     signout: () => void, 
-    signingOut: boolean
+    signingOut: boolean,
+    appVer: string
   } = $props();
 
   async function anonSignout() {
@@ -30,7 +30,8 @@
 </script>
 
 <h2>Welcome!</h2>
-<p><strong>User Id: </strong>{user.uid}</p>
+<p><strong>User Id: </strong> {user.uid}</p>
+<p><strong>App Version: </strong> {appVer}</p>
 <div class="buttons">
   <button class="primary button" onclick={linkAccount}>Link Google Account</button>
 

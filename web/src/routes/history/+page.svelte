@@ -7,7 +7,6 @@
 	import { auth } from "$lib/firebase-client";
 	import { goto } from "$app/navigation";
 
-  console.debug(`PUBLIC_API = ${PUBLIC_API}`);
   let groupedLogs: GroupedLogs[] = $state([]);
   let editable = $state(false);
   let editLog: Log | undefined = $state();
@@ -44,9 +43,10 @@
     }
   }
 
-  async function loadHistory() {
+  async function loadHistory_old() {
     try {
         let url = `${PUBLIC_API}/logs?grouped=true`;
+        console.debug(`Fetching history from ${url} with token ${token}`);
         const response = await fetch(
             url, 
             {
@@ -67,6 +67,46 @@
             console.error("Did not get OK response");
         }
         groupedLogs = glogs;
+    } catch (error) {
+        const err = error as Error;
+        console.error('Error fetching data:', err.message);
+        throw new Error("Unable to fetch the latest posts!");
+    }
+  }
+
+  async function loadHistory() {
+    try {
+        let url = `${PUBLIC_API}/logs`;
+        console.debug(`Fetching history from ${url} with token ${token}`);
+        const response = await fetch(
+            url, 
+            {
+                method: "GET",
+                headers: {"X-Token": token}
+            }
+        );
+        let logs = [];
+        if (response.ok) {
+            logs = await response.json();
+            
+            const grouped: { [key: string]: GroupedLogs } = {};
+
+            for (const log of logs) {
+              log.createdAtUtc = new Date(Date.parse(log.createdAtUtc));
+              const localDate = log.createdAtUtc.toLocaleDateString();
+              if (!grouped[localDate]) {
+                grouped[localDate] = {
+                  datestamp: new Date(log.createdAtUtc.toDateString()),
+                  logs: [],
+                };
+              }
+              grouped[localDate].logs.push(log);
+            }
+
+            groupedLogs = Object.values(grouped);
+        } else {
+            console.error("Did not get OK response");
+        }
     } catch (error) {
         const err = error as Error;
         console.error('Error fetching data:', err.message);

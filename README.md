@@ -15,13 +15,14 @@ Steps I need to take when setting up a VM after logging in for the first time.
 
 #### Installation
 ```shell
-> apt update
-> apt upgrade
-> apt install git
-> apt install nginx
+> sudo apt update
+> sudo apt upgrade
+> sudo apt install git
+> sudo apt install nginx
 > curl -LsSf https://astral.sh/uv/install.sh | sh
-> apt install sqlite3
+> sudo apt install sqlite3
 > curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+> sudo apt install certbot python3-certbot-nginx
 ```
 
 Generate keys -
@@ -31,6 +32,12 @@ Generate keys -
 Add the `id_rsa.pub` file to github and then pull the project.
 
 #### API
+Create the log dir -
+```shell
+sudo mkdir /var/log/logbook-api
+sudo chown -R $USER:$USER /var/log/logbook-api
+```
+
 Create the logbook db -
 ```shell
 > cd /path/to/log-book/api
@@ -55,13 +62,14 @@ Copy the firebase creds.
 
 Set up the environ -
 ```shell
+> cd /path/to/log-book
 > uv sync --frozen --no-cache
 ```
 
 Check if the FastAPI API server comes up -
 ```shell
 > cd /path/to/log-book/api/log_book
-> fastapi run app.py
+> /path/to/log-book/.venv/bin/fastapi run app.py
 ```
 
 Set up fastapi as a daemon -
@@ -83,15 +91,16 @@ Check if the daemon is up and running correctly -
 > systemctl --user status logbook-api
 ```
 
-The uvicorn logs should be visible as part of the status.
-
-Copy nginx.conf to nginx conf dir
+Copy nginx.conf to nginx sites-enabled dir and create a symlink from the sites-available dir.
 ```shell
 > cd /path/to/log-book/api
-> cp nginx.conf /etc/nginx/conf.d/logbook-api.conf
-> nginx -t
-> nginx -s reload
+> sudo cp nginx.conf /etc/nginx/sites-available/logbook-api.conf
+> sudo ln -s /etc/nginx/sites-available/logbook-api.conf /etc/nginx/sites-enabled/
+> sudo nginx -t
+> sudo nginx -s reload
 ```
+
+Check if the API is available by going to `http://logbook-api.avilay.rocks/version`. 
 
 #### Web
 
@@ -115,4 +124,28 @@ Create the .env file.
 Build the website
 ```shell
 > npm run build
+```
+
+Create the nginx directory and Copy the build there -
+```
+> sudo mkdir /var/www/logbook
+> sudo chown -R $USER:$USER /var/www/logbook
+> cp -r build/* /var/www/logbook
+```
+
+Copy the nginx conf -
+```shell
+> sudo cp nginx.conf /etc/nginx/sites-available/logbook.conf
+> sudo ln -s /etc/nginx/sites-available/logbook.conf /etc/nginx/sites-enabled/
+```
+
+#### SSL
+After both the nginx conf files have been setup and everything is working fine without SSL, do the following -
+```shell
+> sudo certbot --nginx -d logbook.avilay.rocks -d logbook-api.avilay.rocks
+```
+
+Certbot figured out that I owned the domains so there were no steps after this. Otherwise follow the steps in [Digital Ocean doc](https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-20-04). This command will automatically set up a cert renewal process. Check its status -
+```shell
+systemctl status certbot.timer
 ```

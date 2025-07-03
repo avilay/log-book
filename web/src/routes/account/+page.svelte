@@ -7,6 +7,7 @@ import UserAccount from "./UserAccount.svelte";
 
 let signingOut = $state(false);
 let signedInUser: User | undefined = $state();
+const appVer = "0.0.1";
 
 async function signout() {
   signingOut = true;
@@ -31,9 +32,9 @@ onAuthStateChanged(auth, (user) => {
 <div class="content">
   {#if signedInUser}
     {#if signedInUser.isAnonymous}
-      <AnonAccount user={signedInUser} {signout} {signingOut} />
+      <AnonAccount user={signedInUser} {signout} {signingOut} {appVer} />
     {:else}
-      <UserAccount user={signedInUser} {signout} {signingOut} />
+      <UserAccount user={signedInUser} {signout} {signingOut} {appVer} />
     {/if}
   {:else}
     <p>You are not signed in.</p>

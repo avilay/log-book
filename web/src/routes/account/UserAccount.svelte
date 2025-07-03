@@ -1,14 +1,20 @@
 <script lang="ts">
   import type { User } from "firebase/auth";
 
-  let { user, signout, signingOut }: { user: User, signout: () => void, signingOut: boolean } = $props();
+  let { user, signout, signingOut, appVer }: { 
+    user: User, 
+    signout: () => void, 
+    signingOut: boolean, 
+    appVer: string 
+  } = $props();
 </script>
 
 <div class="profile">
-  <img src={user.providerData[0].photoURL} alt="" />
+  <img src={user.providerData[0].photoURL} alt="A head shot of the user profile" />
   <div class="info">
     <h2>Welcome {user.providerData[0].displayName}</h2>
-    <p><strong>User Id: </strong>{user.uid}</p>
+    <p><strong>User Id: </strong> {user.uid}</p>
+    <p><string>App Version: </string> {appVer}</p>
   </div>
 </div>
 <div>

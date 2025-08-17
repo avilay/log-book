@@ -72,23 +72,24 @@ cd /path/to/log-book/api/log_book
 /path/to/log-book/.venv/bin/fastapi run app.py
 ```
 
-Set up fastapi as a daemon -
+Set up fastapi as a **system level** daemon -
 Choose a systemctl install path by running -
 ```shell
-systemd-analyze --user unit-paths
+systemd-analyze --system unit-paths
 ```
 
 Ensure that the `[WorkingDirectory]` setting of logbook-api.service is correct.
 Copy logbook-api.service into one of these paths. Create the path if it does not exist.
 Reload all deamons and start the fastapi daemon  -
 ```shell
-systemctl --user daemon-reload
-systemctl --user enable --now logbook-api
+sudo cp logbook-api.service /usr/lib/systemd/system
+systemctl daemon-reload
+systemctl enable --now logbook-api
 ```
 
 Check if the daemon is up and running correctly -
 ```shell
-systemctl --user status logbook-api
+systemctl status logbook-api
 ```
 
 Copy nginx.conf to nginx sites-enabled dir and create a symlink from the sites-available dir.
@@ -151,6 +152,10 @@ systemctl status certbot.timer
 ```
 
 ### Upgrades
+
+```shell
+ssh -i .ssh/aws-us-west-2-keypair.pem ubuntu@logbook.avilay.rocks
+```
 
 ```shell
 cd ~/projects/log-book

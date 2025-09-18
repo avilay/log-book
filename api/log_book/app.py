@@ -1,7 +1,9 @@
+import configparser
 import logging
 import traceback
 from datetime import datetime
 from itertools import groupby
+from pathlib import Path
 from typing import Annotated, Sequence
 
 import firebase_admin
@@ -15,6 +17,9 @@ from log_book.log import Log, LogService
 from pydantic import BaseModel, field_serializer
 from starlette.middleware.base import BaseHTTPMiddleware
 
+# Default log file path
+DEFAULT_LOG_PATH = "/var/log/logbook-api/access.log"
+
 
 class GroupedLogs(BaseModel):
     datestamp: datetime
@@ -25,9 +30,31 @@ class GroupedLogs(BaseModel):
         return datestamp.isoformat(timespec="minutes")
 
 
+def get_log_file_path():
+    """Parse the uvicorn logger config to get the log file path."""
+    config_path = Path("../uvicorn_logger.ini")
+
+    if not config_path.exists():
+        return DEFAULT_LOG_PATH
+
+    config = configparser.ConfigParser()
+    config.read(config_path)
+
+    try:
+        args_str = config["handler_logfile"]["args"]
+        # Strip leading ( and split on comma to get first element
+        # From "('/var/log/logbook-api/access.log','a')" -> "'/var/log/logbook-api/access.log'"
+        first_arg = args_str.lstrip("(").split(",")[0]
+        # Strip quotes
+        return first_arg.strip("'\"")
+    except Exception:
+        return DEFAULT_LOG_PATH
+
+
 load_dotenv()
 
-handlers = [logging.FileHandler("/var/log/logbook-api/access.log")]
+log_file_path = get_log_file_path()
+handlers = [logging.FileHandler(log_file_path)]
 logformat = "%(asctime)s:%(levelname)s:%(name)s:%(message)s"
 logging.basicConfig(
     format=logformat,
@@ -54,17 +81,13 @@ class LoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         try:
             body = await request.body()
-
-            if (
-                request.method == "POST"
-                or request.method == "PUT"
-                or request.method == "DELETE"
-            ):
-                logger.info(
-                    f"Incoming request: {request.method} {request.url} Payload: {body.decode('utf-8')}"
-                )
+            x_token = request.headers.get("x-token", "None")
+            logger.debug(
+                f"Incoming request: {request.method} {request.url}\n\tX-Token: {x_token}\n\tPayload: {body.decode('utf-8')}"
+            )
         except Exception as e:
             logger.warning(f"Could not read request body: {e}")
+
         try:
             response = await call_next(request)
             return response

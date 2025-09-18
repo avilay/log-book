@@ -1,12 +1,53 @@
 # log-book
 
-##### References
+## References
 * https://firebase.google.com/docs/auth/web/start: Overview on how to get started with web auth.
 * https://firebase.google.com/docs/auth/web/manage-users#get_the_currently_signed-in_user: How to add ACL to individual pages, or in my case svelte routes.
 * https://firebase.google.com/docs/reference/js/auth: JS documentation of auth package.
 * https://firebase.google.com/docs/admin/setup#python: How to setup firebase on the backend so it can extract the user id from the id token that is sent by the client.
 * https://firebase.google.com/docs/auth/admin/verify-id-tokens#web: How to extract the user id from the id token. The example in this page uses the `auth` object but does not have any instructions on how to get it. The setup link above has this information in the [Intialize multiple apps](https://firebase.google.com/docs/admin/setup#initialize-multiple-apps) section.
 
+## Development
+
+### Quick Start
+
+To start both web and API development servers:
+
+```shell
+./startup_dev.py
+```
+
+This script will:
+- Automatically detect your private IP address
+- Update `web/.env` to point to your local API server
+- Start the web server in a new terminal tab (accessible at `http://your-ip:5173`)
+- Start the API server in a new terminal tab (accessible at `http://your-ip:8000`)
+- Both servers are accessible from your mobile phone using the IP address
+
+To stop both servers:
+
+```shell
+./shutdown_dev.py
+```
+
+This will gracefully terminate both the web and API servers.
+
+### Manual Development Setup
+
+If the automated scripts don't work, you can start the servers manually:
+
+#### Web Server
+```shell
+cd web
+npm run dev -- --host 0.0.0.0
+```
+
+#### API Server
+```shell
+cd api/log_book
+source ../../.venv/bin/activate
+fastapi dev app.py --host 0.0.0.0
+```
 
 ## Deployment
 

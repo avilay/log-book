@@ -1,8 +1,7 @@
 import configparser
 import logging
 import traceback
-from datetime import datetime
-from itertools import groupby
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Annotated, Sequence
 
@@ -14,20 +13,10 @@ from fastapi.responses import JSONResponse
 from firebase_admin import auth
 from firebase_admin._auth_utils import InvalidIdTokenError
 from log_book.log import Log, LogService
-from pydantic import BaseModel, field_serializer
 from starlette.middleware.base import BaseHTTPMiddleware
 
 # Default log file path
 DEFAULT_LOG_PATH = "/var/log/logbook-api/access.log"
-
-
-class GroupedLogs(BaseModel):
-    datestamp: datetime
-    logs: list[Log]
-
-    @field_serializer("datestamp")
-    def serialize_datestamp(self, datestamp: datetime, _info) -> str:
-        return datestamp.isoformat(timespec="minutes")
 
 
 def get_log_file_path():
@@ -113,31 +102,25 @@ async def version() -> str:
 
 @app.get("/logs")
 async def logs(
-    x_token: Annotated[str | None, Header()], grouped=False
-) -> Sequence[Log] | Sequence[GroupedLogs]:
+    x_token: Annotated[str | None, Header()],
+    days: int = 3,
+    offset_days: int = 0
+) -> Sequence[Log]:
     token = auth.verify_id_token(x_token)
     uid = token["uid"]
+
+    # Calculate date range for pagination
+    now = datetime.now(timezone.utc)
+    to_ds = now - timedelta(days=offset_days)
+    from_ds = now - timedelta(days=offset_days + days)
+
+    logger.info(f"Fetching logs for user {uid} from {from_ds} to {to_ds}")
+
     all_logs = sorted(
-        log_svc.logs(uid), key=lambda log: log.created_at_utc, reverse=True
+        log_svc.logs(uid, from_ds, to_ds), key=lambda log: log.created_at_utc, reverse=True
     )
-    if all_logs:
-        logger.info(f"Processing {len(all_logs)} logs for user {uid}")
-        tz = all_logs[0].created_at_utc.tzinfo
-        if grouped:
-            grouped_logs = [
-                GroupedLogs(
-                    datestamp=datetime(
-                        year=ds.year, month=ds.month, day=ds.day, tzinfo=tz
-                    ),
-                    logs=list(glogs),
-                )
-                for ds, glogs in groupby(
-                    all_logs, key=lambda log: log.created_at_utc.date()
-                )
-            ]
-            return grouped_logs
-    else:
-        logger.info(f"No logs to process for user {uid}")
+    if not all_logs:
+        logger.info(f"No logs to process for user {uid} in date range")
     return all_logs
 
 

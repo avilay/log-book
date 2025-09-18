@@ -1,6 +1,18 @@
 <script lang="ts">
   import { formatDay, formatTime } from "$lib";
-  let { groupedLogs, editClicked } : {groupedLogs: GroupedLogs[], editClicked: () => void} = $props();
+  let {
+    groupedLogs,
+    editClicked,
+    hasMoreLogs,
+    isLoadingMore,
+    loadMoreHistory
+  } : {
+    groupedLogs: GroupedLogs[],
+    editClicked: () => void,
+    hasMoreLogs: boolean,
+    isLoadingMore: boolean,
+    loadMoreHistory: () => Promise<void>
+  } = $props();
 </script>
 
 <div class="top-bar">
@@ -18,6 +30,19 @@
       </div>
     {/each}
   {/each}
+
+  {#if hasMoreLogs}
+    <div class="pagination-controls">
+      <a
+        href="#"
+        class="next-link"
+        onclick={(e) => { e.preventDefault(); loadMoreHistory(); }}
+        class:loading={isLoadingMore}
+      >
+        {isLoadingMore ? "loading..." : "next"}
+      </a>
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -46,5 +71,26 @@
     gap: 1em;
     align-items: center;
     justify-content: flex-start;
+  }
+
+  .pagination-controls {
+    margin-top: 1.5em;
+    margin-bottom: 2em;
+
+    .next-link {
+      color: vars.$secondary-color;
+      text-decoration: none;
+      cursor: pointer;
+
+      &:hover {
+        text-decoration: underline;
+      }
+
+      &.loading {
+        color: vars.$understated-color;
+        cursor: default;
+        pointer-events: none;
+      }
+    }
   }
 </style>

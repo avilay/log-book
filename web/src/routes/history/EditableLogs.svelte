@@ -2,11 +2,22 @@
   import { fade } from "svelte/transition";
   import { formatDay, formatTime } from "$lib";
 
-  let { groupedLogs, doneClicked, genDeleteLogAt, genEditLogAt }: {
-    groupedLogs: GroupedLogs[], 
-    doneClicked: () => void, 
+  let {
+    groupedLogs,
+    doneClicked,
+    genDeleteLogAt,
+    genEditLogAt,
+    hasMoreLogs,
+    isLoadingMore,
+    loadMoreHistory
+  }: {
+    groupedLogs: GroupedLogs[],
+    doneClicked: () => void,
     genDeleteLogAt: (gidx: number, lidx: number) => (() => void),
-    genEditLogAt: (gidx: number, lidx: number) => (() => void)
+    genEditLogAt: (gidx: number, lidx: number) => (() => void),
+    hasMoreLogs: boolean,
+    isLoadingMore: boolean,
+    loadMoreHistory: () => Promise<void>
   } = $props();
 </script>
 
@@ -26,13 +37,13 @@
         <div>{formatTime(log["createdAtUtc"])}</div>
         <div>{log["activity"]}</div>
         <button class="edit" onclick={genEditLogAt(gidx, lidx)} aria-label="Edit log">
-          <svg 
+          <svg
           class="edit-icon"
-          data-name="Design Convert" 
-          id="Design_Convert" 
+          data-name="Design Convert"
+          id="Design_Convert"
           width="24"
           height="24"
-          viewBox="0 0 64 64" 
+          viewBox="0 0 64 64"
           xmlns="http://www.w3.org/2000/svg">
           <path d="M16,57a1,1,0,0,1-.8-.4,1,1,0,0,1,.2-1.4L46.33,32,15.4,8.8a1,1,0,1,1,1.2-1.6l32,24a1,1,0,0,1,0,1.6l-32,24A1,1,0,0,1,16,57Z"/>
           </svg>
@@ -40,6 +51,19 @@
       </div>
     {/each}
   {/each}
+
+  {#if hasMoreLogs}
+    <div class="pagination-controls">
+      <a
+        href="#"
+        class="next-link"
+        onclick={(e) => { e.preventDefault(); loadMoreHistory(); }}
+        class:loading={isLoadingMore}
+      >
+        {isLoadingMore ? "loading..." : "next"}
+      </a>
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -93,5 +117,26 @@
   button.delete, button.edit {
     border: 0;
     background: none;
+  }
+
+  .pagination-controls {
+    margin-top: 1.5em;
+    margin-bottom: 2em;
+
+    .next-link {
+      color: vars.$secondary-color;
+      text-decoration: none;
+      cursor: pointer;
+
+      &:hover {
+        text-decoration: underline;
+      }
+
+      &.loading {
+        color: vars.$understated-color;
+        cursor: default;
+        pointer-events: none;
+      }
+    }
   }
 </style>

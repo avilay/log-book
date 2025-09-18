@@ -11,6 +11,9 @@
   let editable = $state(false);
   let editLog: Log | undefined = $state();
   let token = $state("");
+  let currentOffsetDays = $state(0);
+  let hasMoreLogs = $state(true);
+  let isLoadingMore = $state(false);
 
   function editClicked() {
     editable = true;
@@ -43,43 +46,16 @@
     }
   }
 
-  async function loadHistory_old() {
+  async function loadHistory(resetLogs = true) {
     try {
-        let url = `${PUBLIC_API}/logs?grouped=true`;
-        console.debug(`Fetching history from ${url} with token ${token}`);
-        const response = await fetch(
-            url, 
-            {
-                method: "GET",
-                headers: {"X-Token": token}
-            }
-        );
-        let glogs = [];
-        if (response.ok) {
-            glogs = await response.json();            
-            for (let glog of glogs) {
-                glog.datestamp = new Date(Date.parse(glog.datestamp));
-                for (let log of glog["logs"]) {
-                    log.createdAtUtc = new Date(Date.parse(log.createdAtUtc));
-                }
-            }
-        } else {
-            console.error("Did not get OK response");
-        }
-        groupedLogs = glogs;
-    } catch (error) {
-        const err = error as Error;
-        console.error('Error fetching data:', err.message);
-        throw new Error("Unable to fetch the latest posts!");
-    }
-  }
+        const days = 3;
+        const url = new URL(`${PUBLIC_API}/logs`);
+        url.searchParams.set('days', days.toString());
+        url.searchParams.set('offset_days', currentOffsetDays.toString());
 
-  async function loadHistory() {
-    try {
-        let url = `${PUBLIC_API}/logs`;
         console.debug(`Fetching history from ${url} with token ${token}`);
         const response = await fetch(
-            url, 
+            url,
             {
                 method: "GET",
                 headers: {"X-Token": token}
@@ -88,7 +64,7 @@
         let logs = [];
         if (response.ok) {
             logs = await response.json();
-            
+
             const grouped: { [key: string]: GroupedLogs } = {};
 
             for (const log of logs) {
@@ -103,7 +79,20 @@
               grouped[localDate].logs.push(log);
             }
 
-            groupedLogs = Object.values(grouped);
+            const newGroupedLogs = Object.values(grouped);
+
+            if (resetLogs) {
+                groupedLogs = newGroupedLogs;
+            } else {
+                // Merge with existing logs, avoiding duplicates
+                const existingDates = new Set(groupedLogs.map(g => g.datestamp.toDateString()));
+                const logsToAdd = newGroupedLogs.filter(g => !existingDates.has(g.datestamp.toDateString()));
+                groupedLogs = [...groupedLogs, ...logsToAdd];
+            }
+
+            // Check if we have more logs (if we got some logs, assume there might be more)
+            // This is a simple heuristic - if we get 0 logs, there are definitely no more
+            hasMoreLogs = logs.length > 0;
         } else {
             console.error("Did not get OK response");
         }
@@ -111,6 +100,19 @@
         const err = error as Error;
         console.error('Error fetching data:', err.message);
         throw new Error("Unable to fetch the latest posts!");
+    }
+  }
+
+  async function loadMoreHistory() {
+    if (isLoadingMore || !hasMoreLogs) return;
+
+    isLoadingMore = true;
+    currentOffsetDays += 3; // Load 3 more days back
+
+    try {
+      await loadHistory(false); // Don't reset logs, append to existing
+    } finally {
+      isLoadingMore = false;
     }
   }
 
@@ -126,7 +128,21 @@
 {#if editLog}
   <EditLog {token} log={editLog} />
 {:else if editable}
-  <EditableLogs groupedLogs={groupedLogs} doneClicked={doneClicked} {genDeleteLogAt} {genEditLogAt} />
+  <EditableLogs
+    groupedLogs={groupedLogs}
+    doneClicked={doneClicked}
+    {genDeleteLogAt}
+    {genEditLogAt}
+    {hasMoreLogs}
+    {isLoadingMore}
+    {loadMoreHistory}
+  />
 {:else}
-  <ReadOnlyLogs groupedLogs={groupedLogs} {editClicked} />
+  <ReadOnlyLogs
+    groupedLogs={groupedLogs}
+    {editClicked}
+    {hasMoreLogs}
+    {isLoadingMore}
+    {loadMoreHistory}
+  />
 {/if}
